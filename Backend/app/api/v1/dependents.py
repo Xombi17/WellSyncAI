@@ -42,8 +42,8 @@ async def list_dependents(
     query = select(Dependent).order_by(Dependent.created_at)
     if household_id:
         query = query.where(Dependent.household_id == household_id)
-    result = await session.exec(query)
-    return result.all()
+    result = await session.execute(query)
+    return result.scalars().all()
 
 
 @router.get("/{dependent_id}", response_model=DependentResponse)

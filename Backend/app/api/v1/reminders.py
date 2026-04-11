@@ -40,8 +40,8 @@ async def list_reminders(
         query = query.where(Reminder.household_id == household_id)
     if status_filter:
         query = query.where(Reminder.status == status_filter)
-    result = await session.exec(query)
-    return result.all()
+    result = await session.execute(query)
+    return result.scalars().all()
 
 
 @router.post("/{reminder_id}/done", response_model=ReminderResponse)

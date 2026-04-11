@@ -40,6 +40,7 @@ def compute_status(due_date: date, completed: bool, today: date | None = None) -
 # Engine: generate and persist schedule for a dependent
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 async def generate_and_save_schedule(
     dependent: Dependent,
     session: AsyncSession,
@@ -57,10 +58,8 @@ async def generate_and_save_schedule(
     scheduled = generate_child_schedule(dob)
 
     # Fetch existing events for this dependent (to avoid duplicates)
-    result = await session.exec(
-        select(HealthEvent).where(HealthEvent.dependent_id == dependent.id)
-    )
-    existing_events = result.all()
+    result = await session.execute(select(HealthEvent).where(HealthEvent.dependent_id == dependent.id))
+    existing_events = result.scalars().all()
     existing_keys = {e.schedule_key for e in existing_events}
 
     today = date.today()
@@ -104,10 +103,8 @@ async def refresh_event_statuses(
     Recompute status for all non-completed health events and persist updates.
     Call this on every timeline fetch to keep statuses current.
     """
-    result = await session.exec(
-        select(HealthEvent).where(HealthEvent.dependent_id == dependent_id)
-    )
-    events = result.all()
+    result = await session.execute(select(HealthEvent).where(HealthEvent.dependent_id == dependent_id))
+    events = result.scalars().all()
     today = date.today()
 
     for event in events:
