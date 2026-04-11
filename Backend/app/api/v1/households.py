@@ -27,8 +27,8 @@ async def create_household(
 async def list_households(
     session: AsyncSession = Depends(get_session),
 ) -> list[Household]:
-    result = await session.exec(select(Household).order_by(Household.created_at.desc()))
-    return result.all()
+    result = await session.execute(select(Household).order_by(Household.created_at.desc()))
+    return result.scalars().all()
 
 
 @router.get("/{household_id}", response_model=HouseholdResponse)
