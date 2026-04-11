@@ -6,6 +6,15 @@ import { Providers } from '@/components/Providers';
 export const metadata: Metadata = {
   title: 'WellSync AI',
   description: 'Voice-First Health Memory System',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
