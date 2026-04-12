@@ -15,7 +15,7 @@ export interface AuthState {
  */
 export function getAuthState(): AuthState {
   if (typeof window === 'undefined') {
-    return { token: null, householdId: null, isAuthenticated: false };
+    return { token: null, householdId: null, name: null, isAuthenticated: false };
   }
 
   const token = localStorage.getItem(TOKEN_KEY);
