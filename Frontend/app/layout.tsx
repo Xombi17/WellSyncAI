@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css'; // Global styles
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Providers } from '@/components/Providers';
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 
 export const metadata: Metadata = {
   title: 'WellSync AI',
@@ -20,9 +21,13 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className="bg-slate-100 dark:bg-slate-900 transition-colors duration-300" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Providers>
+            <ServiceWorkerRegistration />
             {children}
           </Providers>
         </ThemeProvider>
