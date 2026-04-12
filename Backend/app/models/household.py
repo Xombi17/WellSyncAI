@@ -34,7 +34,7 @@ class Household(SQLModel, table=True):
         primary_key=True,
         index=True,
     )
-    username: str = Field(unique=True, index=True, min_length=3, max_length=50)
+    username: str = Field(unique=True, index=True, min_length=3, max_length=255)
     password_hash: str = Field(min_length=8)
     auth_id: uuid.UUID | None = Field(default=None, unique=True, index=True, description="Neon Auth user ID")
     name: str = Field(min_length=1, max_length=200, description="Family / household name")

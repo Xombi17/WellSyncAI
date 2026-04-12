@@ -36,9 +36,6 @@ class Settings(BaseSettings):
     github_chat_model: str = "openai/gpt-4o"
     github_vision_model: str = "openai/gpt-4o"
 
-    # Vapi webhook
-    vapi_webhook_secret: str = ""
-
     # Sarvam AI (Indian languages - STT, TTS, Translation)
     sarvam_api_key: str = ""
 
@@ -61,12 +58,7 @@ class Settings(BaseSettings):
     twilio_phone_number: str = ""
     notification_phone: str = ""
 
-    # Vapi for IVR calls
-    vapi_api_key: str = ""
-    vapi_assistant_id: str = ""
-    vapi_phone_number_id: str = ""
-
-    # Google Gemini Live API (for Hindi/Marathi voice)
+    # Google Gemini Live API (for voice interactions)
     google_ai_api_key: str = ""
 
 

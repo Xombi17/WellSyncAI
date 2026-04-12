@@ -45,7 +45,7 @@ Proactive, voice-first, family-centered memory system that:
 - **Database:** Neon serverless Postgres
 - **AI:** Groq (llama-3.3-70b-versatile) for explanation/simplification only
 - **Local AI:** Ollama with Gemma 4 + Llama 3.2 Vision for OCR
-- **Voice:** Vapi AI for live voice agent orchestration
+- **Voice:** Gemini Live for real-time voice interaction across all languages
 - **Auth:** Auth.js/NextAuth with Prisma adapter
 
 ## Existing Code
@@ -81,7 +81,6 @@ This is a brownfield project — substantial code already exists:
 
 ### Active
 
-- [ ] Vapi webhook endpoint for live voice
 - [ ] Alembic migration setup
 - [ ] Full test suite (pytest)
 - [ ] Next.js frontend integration

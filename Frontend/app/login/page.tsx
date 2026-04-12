@@ -100,7 +100,7 @@ export default function LoginPage() {
     setLoading('signup');
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      const username = signupForm.email.split('@')[0];
+      const username = signupForm.email;
       const createRes = await fetch(`${API_URL}/api/v1/households`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -224,7 +224,7 @@ export default function LoginPage() {
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                       <input
-                        type="email"
+                        type="text"
                         value={loginForm.email}
                         onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                         className="w-full pl-12 pr-4 py-3 bg-slate-100 dark:bg-slate-700 rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"

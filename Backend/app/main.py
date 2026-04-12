@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import router as v1_router
 from app.core.config import get_settings
 from app.core.database import create_db_and_tables
+from app.core.health import check_startup_health
 
 log = structlog.get_logger()
 settings = get_settings()
@@ -19,10 +20,16 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown logic."""
-    log.info("wellsync_starting", 
-             env=settings.app_env, 
+    log.info("wellsync_starting",
+             env=settings.app_env,
              port=settings.app_port,
              allowed_origins=settings.frontend_url.split(","))
+
+    # Validate environment
+    health = check_startup_health()
+    if not health.get("healthy"):
+        log.error("startup_health_check_failed", health=health)
+        raise RuntimeError("Startup health check failed. Check environment variables.")
 
     # Auto-create tables in development (use Alembic for production)
     if settings.is_dev:

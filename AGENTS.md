@@ -64,12 +64,11 @@ cp .env.example .env
 
 | Language | Provider | Model |
 |----------|----------|-------|
-| English (en) | Vapi | GPT-4o |
-| Hindi, Marathi, Gujarati, Bengali, Tamil, Telugu | Gemini Live | gemini-3.1-flash-preview |
+| All (en, hi, mr, etc.) | Gemini Live | gemini-3.1-flash-preview |
 
 - **Frontend/lib/gemini-voice.ts**: Gemini Live API integration (callback-based pattern)
-- **Frontend/components/VoiceFAB.tsx**: Voice FAB with auto-routing
-- **Backend/app/api/v1/voice.py**: Vapi webhook for English, Gemini for regional
+- **Frontend/components/VoiceFAB.tsx**: Voice FAB using Gemini Live for all languages
+- **Backend/app/api/v1/voice.py**: Gemini Live tool handlers for family data
 
 ## Lint & Test Order
 
@@ -85,20 +84,20 @@ cp .env.example .env
 - ✅ AI service using GitHub Models (openai/gpt-4o via https://models.github.ai/inference)
 - ✅ OCR service using OpenAI gpt-4o multimodal (no local Ollama required)
 - ✅ Medicine safety classification engine
-- ✅ API routes: /v1/households, /v1/dependents, /v1/voice (webhook)
+- ✅ API routes: /v1/households, /v1/dependents, /v1/voice (tools)
 - ✅ 29/29 pytest assertions passing
-- ✅ Gemini Live API voice for regional languages (Hindi, Marathi, etc.)
-- ✅ Voice FAB auto-routes to Gemini for regional languages
+- ✅ Gemini Live API voice for all languages (English, Hindi, Marathi, etc.)
+- ✅ Voice FAB using Gemini Live
 - ✅ Settings page simplified - no premium mode modal
 
 ### Stack Changes (Approved)
 - **Replaced Groq with GitHub Models** (openai/gpt-4o)
 - **Replaced Ollama + Google Cloud Vision with OpenAI gpt-4o multimodal**
 - **Fixed Neon SSL** — removed `sslmode=require&channel_binding=require` from DATABASE_URL
-- **Replaced ElevenLabs with Gemini Live** for regional languages
-- **Removed all 11Labs/ElevenLabs references** from frontend and backend
+- **Replaced Vapi and ElevenLabs with Gemini Live** for all languages
+- **Removed all Vapi/11Labs/ElevenLabs references** from frontend and backend
 
 ### Pending
 - Alembic migrations
 - Frontend integration (complete)
-- Vapi webhook (complete)
+- Offline PWA (Phase 4)

@@ -21,18 +21,20 @@ model conversations {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model dependents {
-  id                     String          @id @db.VarChar
-  household_id           String          @db.VarChar
-  name                   String          @db.VarChar(200)
+  id                     String              @id @db.VarChar
+  household_id           String              @db.VarChar
+  name                   String              @db.VarChar(200)
   type                   dependenttype
-  date_of_birth          DateTime        @db.Date
+  date_of_birth          DateTime            @db.Date
   sex                    sex
-  expected_delivery_date DateTime?       @db.Date
-  notes                  String?         @db.VarChar(500)
-  created_at             DateTime        @db.Timestamp(6)
-  updated_at             DateTime        @db.Timestamp(6)
-  households             households      @relation(fields: [household_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  expected_delivery_date DateTime?           @db.Date
+  notes                  String?             @db.VarChar(500)
+  created_at             DateTime            @db.Timestamp(6)
+  updated_at             DateTime            @db.Timestamp(6)
+  households             households          @relation(fields: [household_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  growth_records         growth_records[]
   health_events          health_events[]
+  medicine_regimens      medicine_regimens[]
   reminders              reminders[]
 
   @@index([household_id], map: "ix_dependents_household_id")
@@ -81,27 +83,32 @@ model health_notes {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model households {
-  id                String          @id @db.VarChar
-  username          String          @unique(map: "ix_households_username") @db.VarChar(50)
-  password_hash     String          @db.VarChar
-  auth_id           String?         @unique(map: "ix_households_auth_id") @db.Uuid
-  name              String          @db.VarChar(200)
-  primary_language  String          @db.VarChar(10)
-  user_type         usertype
-  village_town      String?         @db.VarChar(200)
-  state             String?         @db.VarChar(100)
-  district          String?         @db.VarChar(100)
-  preferences       Json?           @db.Json
-  last_onboarded_at DateTime?       @db.Timestamp(6)
-  created_at        DateTime        @db.Timestamp(6)
-  updated_at        DateTime        @db.Timestamp(6)
-  conversations     conversations[]
-  dependents        dependents[]
-  health_events     health_events[]
-  health_notes      health_notes[]
-  reminders         reminders[]
+  id                 String               @id @db.VarChar
+  username           String               @unique(map: "ix_households_username") @db.VarChar(255)
+  password_hash      String               @db.VarChar
+  auth_id            String?              @unique(map: "ix_households_auth_id") @db.Uuid
+  name               String               @db.VarChar(200)
+  primary_language   String               @db.VarChar(10)
+  user_type          usertype
+  village_town       String?              @db.VarChar(200)
+  state              String?              @db.VarChar(100)
+  district           String?              @db.VarChar(100)
+  preferences        Json?                @db.Json
+  last_onboarded_at  DateTime?            @db.Timestamp(6)
+  created_at         DateTime             @db.Timestamp(6)
+  updated_at         DateTime             @db.Timestamp(6)
+  auth_user_id       String?              @db.VarChar
+  conversations      conversations[]
+  dependents         dependents[]
+  growth_records     growth_records[]
+  health_events      health_events[]
+  health_notes       health_notes[]
+  medicine_regimens  medicine_regimens[]
+  pregnancy_profiles pregnancy_profiles[]
+  reminders          reminders[]
 
   @@index([id], map: "ix_households_id")
+  @@index([auth_user_id], map: "ix_households_auth_user_id")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -129,6 +136,70 @@ model reminders {
   @@index([health_event_id], map: "ix_reminders_health_event_id")
   @@index([household_id], map: "ix_reminders_household_id")
   @@index([id], map: "ix_reminders_id")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model alembic_version {
+  version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model growth_records {
+  id                    String     @id @db.VarChar
+  dependent_id          String     @db.VarChar
+  household_id          String     @db.VarChar
+  recorded_date         DateTime   @db.Date
+  height_cm             Float?
+  weight_kg             Float?
+  head_circumference_cm Float?
+  milestone_achieved    String?    @db.VarChar(300)
+  notes                 String     @db.VarChar(500)
+  created_at            DateTime   @db.Timestamp(6)
+  dependents            dependents @relation(fields: [dependent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  households            households @relation(fields: [household_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([dependent_id], map: "ix_growth_records_dependent_id")
+  @@index([household_id], map: "ix_growth_records_household_id")
+  @@index([id], map: "ix_growth_records_id")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model medicine_regimens {
+  id               String        @id @db.VarChar
+  dependent_id     String        @db.VarChar
+  household_id     String        @db.VarChar
+  medicine_name    String        @db.VarChar(300)
+  dosage           String        @db.VarChar(100)
+  frequency        frequencytype
+  start_date       DateTime      @db.Date
+  end_date         DateTime?     @db.Date
+  safety_bucket    String        @db.VarChar(100)
+  prescribing_note String        @db.VarChar(500)
+  active           Boolean
+  created_at       DateTime      @db.Timestamp(6)
+  updated_at       DateTime      @db.Timestamp(6)
+  dependents       dependents    @relation(fields: [dependent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  households       households    @relation(fields: [household_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([dependent_id], map: "ix_medicine_regimens_dependent_id")
+  @@index([household_id], map: "ix_medicine_regimens_household_id")
+  @@index([id], map: "ix_medicine_regimens_id")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model pregnancy_profiles {
+  id                String     @id @db.VarChar
+  household_id      String     @db.VarChar
+  lmp_date          DateTime   @db.Date
+  expected_due_date DateTime   @db.Date
+  high_risk_flags   String     @db.VarChar(500)
+  completed         Boolean
+  created_at        DateTime   @db.Timestamp(6)
+  updated_at        DateTime   @db.Timestamp(6)
+  households        households @relation(fields: [household_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([household_id], map: "ix_pregnancy_profiles_household_id")
+  @@index([id], map: "ix_pregnancy_profiles_id")
 }
 
 enum dependenttype {
@@ -177,4 +248,12 @@ enum usertype {
   asha
   anganwadi
   health_worker
+}
+
+enum frequencytype {
+  daily
+  twice_daily
+  three_daily
+  weekly
+  as_needed
 }

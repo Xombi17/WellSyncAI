@@ -15,8 +15,8 @@ engine = create_async_engine(
     url,
     echo=settings.is_dev,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
+    pool_size=1,
+    max_overflow=0,
     connect_args={
         "ssl": "require",
         "command_timeout": 60,

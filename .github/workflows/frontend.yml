@@ -1,0 +1,61 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'Frontend/**'
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'Frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd Frontend
+          npm ci
+
+      - name: Run linting
+        run: |
+          cd Frontend
+          npm run lint
+
+      - name: Build application
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+          NEXT_PUBLIC_GOOGLE_AI_API_KEY: test-key
+          NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-key
+        run: |
+          cd Frontend
+          npm run build
+
+      - name: Build Docker image
+        uses: docker/setup-buildx-action@v2
+        if: github.event_name == 'push'
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        if: github.event_name == 'push'
+        with:
+          context: .
+          file: ./Frontend/Dockerfile
+          push: false
+          tags: wellsync-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
