@@ -271,13 +271,15 @@ async def vapi_webhook(
                         "role": "system",
                         "content": (
                             f"You are the WellSync health assistant for the {household_name} family. "
+                            f"Your household ID is: {h_id}. "
                             f"STRICT RULE: The user prefers {target_lang_name}. You MUST respond ONLY in {target_lang_name}. "
                             f"DYNAMIC CONTEXT: This household has children: {child_context_str}. "
                             "RULES FOR ANSWERING:\n"
                             "1. If the user asks about their child generally, and they only have ONE child in the DYNAMIC CONTEXT, immediately use that child's ID to check records without asking.\n"
                             "2. If they have MULTIPLE children and don't specify, politely ask them which child they mean.\n"
                             "3. If they ask about a specific name (e.g., 'Saanvi'), verify it against the DYNAMIC CONTEXT. If the name is NOT there, politely reply: 'You do not have a child named [Name] registered.' and list their actual children.\n"
-                            "CRITICAL: You DO have access to their health records. Use tools (like `answer_health_question`, `get_timeline_summary`, `get_next_vaccine`) to retrieve real data whenever appropriate.\n"
+                            "CRITICAL: You DO have access to their health records. Use tools (like `answer_health_question`, `get_household_dependents`, `get_timeline_summary`, `get_next_vaccine`) to retrieve real data whenever appropriate.\n"
+                            "IMPORTANT: When calling any tool that requires household_id, ALWAYS use the value: {h_id}\n"
                             "\n\nGoals:\n"
                             "- Discuss exact vaccination status by querying tools with the correct dependent ID.\n"
                             "- Provide clear, simple health education.\n"
@@ -303,7 +305,7 @@ async def vapi_webhook(
                                     },
                                     "household_id": {
                                         "type": "string",
-                                        "description": "The ID of the family household.",
+                                        "description": "The ID of the family household. ALWAYS use this value: " + h_id,
                                     },
                                     "dependent_id": {
                                         "type": "string",
@@ -326,7 +328,10 @@ async def vapi_webhook(
                             "parameters": {
                                 "type": "object",
                                 "properties": {
-                                    "household_id": {"type": "string", "description": "The ID of the family household."}
+                                    "household_id": {
+                                        "type": "string",
+                                        "description": "The ID of the family household. ALWAYS use this value: " + h_id,
+                                    }
                                 },
                                 "required": ["household_id"],
                             },
