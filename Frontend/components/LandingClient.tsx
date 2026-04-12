@@ -33,7 +33,7 @@ export default function LandingClient() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm font-semibold mb-8">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-            Vapi Voice Engine 2.0 Live
+            Gemini Live Voice
           </div>
           
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[1.05] mb-8">
@@ -77,9 +77,9 @@ export default function LandingClient() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: Mic, title: "Just Speak", desc: "Native Voice OS powered by Vapi. Sub-second latency. Feels like talking to a human." },
+              { icon: Mic, title: "Just Speak", desc: "Native Voice powered by Gemini Live. Sub-second latency. Feels like talking to a human." },
               { icon: Globe2, title: "Multi-Lingual", desc: "Fluent in English, Hindi, Marathi, Bengali, Tamil, and Telugu. Reaches the unreached." },
-              { icon: BrainCircuit, title: "Smart Memory", desc: "Remembers your children&apos;s names, upcoming immunizations, and past health events organically." }
+              { icon: BrainCircuit, title: "Smart Memory", desc: "Remembers your children's names, upcoming immunizations, and past health events organically." }
             ].map((feature, i) => (
               <motion.div 
                 key={i}

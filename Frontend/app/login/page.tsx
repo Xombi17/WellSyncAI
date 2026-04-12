@@ -37,10 +37,11 @@ export default function LoginPage() {
     setError(null);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const DEMO_PASSWORD = process.env.NEXT_PUBLIC_DEMO_PASSWORD || 'wellsync_demo_secure_2026';
       const response = await fetch(`${API_URL}/api/v1/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ username, password: 'REMOVED_DEMO_PASSWORD' }),
+        body: new URLSearchParams({ username, password: DEMO_PASSWORD }),
       });
 
       if (!response.ok) throw new Error('Login failed');

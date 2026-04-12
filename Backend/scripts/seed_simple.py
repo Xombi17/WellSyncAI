@@ -27,16 +27,19 @@ if not SUPABASE_SERVICE_KEY:
     exit(1)
 
 # Database setup
-DATABASE_URL = "postgresql+asyncpg://postgres:REMOVED_SUPABASE_PASSWORD@db.azvvmmekxfcuzdadxlub.supabase.co:5432/postgres"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:password@localhost:5432/postgres")
 engine = create_async_engine(DATABASE_URL, echo=False)
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
+# Use a default password from env or a generic one for seeding
+SEED_PASSWORD = os.getenv("SEED_DEMO_PASSWORD", "wellsync_demo_secure_2026")
+
 DEMO_FAMILIES = [
-    {"username": "sharma", "name": "Sharma Family", "email": "sharma@wellsync.demo", "password": "REMOVED_DEMO_PASSWORD"},
-    {"username": "patel", "name": "Patel Family", "email": "patel@wellsync.demo", "password": "REMOVED_DEMO_PASSWORD"},
-    {"username": "kumar", "name": "Kumar Family", "email": "kumar@wellsync.demo", "password": "REMOVED_DEMO_PASSWORD"},
-    {"username": "singh", "name": "Singh Family", "email": "singh@wellsync.demo", "password": "REMOVED_DEMO_PASSWORD"},
-    {"username": "verma", "name": "Verma Family", "email": "verma@wellsync.demo", "password": "REMOVED_DEMO_PASSWORD"},
+    {"username": "sharma", "name": "Sharma Family", "email": "sharma@wellsync.demo", "password": SEED_PASSWORD},
+    {"username": "patel", "name": "Patel Family", "email": "patel@wellsync.demo", "password": SEED_PASSWORD},
+    {"username": "kumar", "name": "Kumar Family", "email": "kumar@wellsync.demo", "password": SEED_PASSWORD},
+    {"username": "singh", "name": "Singh Family", "email": "singh@wellsync.demo", "password": SEED_PASSWORD},
+    {"username": "verma", "name": "Verma Family", "email": "verma@wellsync.demo", "password": SEED_PASSWORD},
 ]
 
 async def clear_data():

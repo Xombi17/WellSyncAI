@@ -212,15 +212,15 @@ CREATE INDEX IF NOT EXISTS idx_health_events_status ON health_events(status);
 ### Frontend `.env`
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_GEMINI_API_KEY=REMOVED_GOOGLE_GEMINI_KEY
-NEXT_PUBLIC_VAPI_PUBLIC_KEY=REMOVED_VAPI_PUBLIC_KEY
-NEXT_PUBLIC_VAPI_ASSISTANT_ID=REMOVED_VAPI_ASSISTANT_ID
+NEXT_PUBLIC_GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
+NEXT_PUBLIC_VAPI_PUBLIC_KEY=YOUR_VAPI_PUBLIC_KEY_HERE
+NEXT_PUBLIC_VAPI_ASSISTANT_ID=YOUR_VAPI_ASSISTANT_ID_HERE
 ```
 
 ### Backend `.env`
 ```env
-DATABASE_URL=postgresql://postgres.azvvmmekxfcuzdadxlub:...@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-DIRECT_URL=postgresql://postgres:...@db.azvvmmekxfcuzdadxlub.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD_HERE@your-supabase-db-url:6543/postgres?pgbouncer=true
+DIRECT_URL=postgresql://postgres:YOUR_PASSWORD_HERE@your-supabase-db-url:5432/postgres
 ```
 
 ---

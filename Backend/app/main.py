@@ -39,7 +39,7 @@ app = FastAPI(
     description=(
         "Voice-first health memory system API. "
         "Provides vaccination timelines, medicine safety checks, "
-        "AI-powered health explanations, and Vapi voice webhooks."
+        "AI-powered health explanations, and Gemini Live voice support."
     ),
     version="0.1.0",
     docs_url="/docs" if settings.is_dev else None,     # Hide Swagger in prod

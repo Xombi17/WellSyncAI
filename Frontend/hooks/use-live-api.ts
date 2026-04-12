@@ -119,8 +119,9 @@ export function useLiveAPI() {
   }, [isConnected, disconnect]);
 
   const connect = useCallback(async (
-    language: string = 'English', 
-    householdId?: string
+    language: string = 'English',
+    householdId?: string,
+    dependentId?: string
   ) => {
     if (isConnected || isConnecting) return;
     setIsConnecting(true);
