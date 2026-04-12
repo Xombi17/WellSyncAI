@@ -208,6 +208,16 @@ async def vapi_tool_call(request: Request) -> dict[str, Any]:
         args=tool_args,
     )
 
+    # Check cache FIRST (except for get_household_dependents - always fetch fresh)
+    cache_key = _get_tool_cache_key(tool_name, tool_args)
+    now = time.time()
+
+    if tool_name != "get_household_dependents" and cache_key in _tool_result_cache:
+        cached_time, cached_result = _tool_result_cache[cache_key]
+        if now - cached_time < TOOL_CACHE_TTL:
+            log.info("tool_result_cache_hit", tool=tool_name, age_seconds=int(now - cached_time))
+            return {"result": cached_result}
+
     result_text = ""
     async for session in get_session():
         result_text = await _handle_tool_call(tool_name, tool_args, session, call_id)
@@ -217,15 +227,20 @@ async def vapi_tool_call(request: Request) -> dict[str, Any]:
             await _record_interaction(household_id, question, result_text, session)
         break
 
-    log.info("tool_call_completed", tool=tool_name, call_id=call_id)
+    # Cache result (except for get_household_dependents - always fetch fresh)
+    if tool_name != "get_household_dependents":
+        _tool_result_cache[cache_key] = (now, result_text)
 
-    # Return just the result string, not wrapped
-    # Vapi expects the raw tool output
-    import json
-    try:
-        return json.loads(result_text)
-    except:
-        return {"result": result_text}
+    log.info(
+        "tool_call_completed",
+        tool=tool_name,
+        call_id=call_id,
+        result_preview=result_text[:100] if result_text else "EMPTY",
+        response_format="wrapped_result"
+    )
+
+    # Always return wrapped result - Vapi tool server expects this format
+    return {"result": result_text}
 
     # ── Tool calls: voice agent needs data ────────────────────────────────
     if event_type == "tool-calls":
@@ -378,6 +393,62 @@ async def vapi_tool_call(request: Request) -> dict[str, Any]:
                 "model": "gpt-4o",
             }
 
+        # Build language-specific system prompt
+        if lang == "en":
+            system_prompt = (
+                f"You are the WellSync health assistant for the {household_name} family.\n"
+                f"Household ID: {h_id}\n\n"
+                "## Critical Rules\n"
+                "1. ALWAYS respond in English only.\n"
+                "2. NEVER fabricate or guess household_id or dependent_id.\n"
+                "3. NEVER read out or repeat any internal IDs (UUIDs, dependent_id values, household_id values).\n"
+                "4. If a tool response contains IDs, ignore them in spoken output.\n\n"
+                "## Mandatory Tool Use\n"
+                "- On the FIRST user message, you MUST immediately call get_household_dependents to get the list of children.\n"
+                "- After calling it, wait for the tool result. Then continue.\n"
+                "- For any vaccination-related query, call answer_health_question with the real household_id and dependent_id.\n\n"
+                "## Household Context\n"
+                f"- Household: {household_name}\n"
+                f"- Children: {child_context_str}\n"
+                f"- Household ID: {h_id}\n\n"
+                "## Tool Responses\n"
+                "When you receive tool results:\n"
+                "- Extract the actual data (names, dates, statuses)\n"
+                "- Speak only the relevant information to the user\n"
+                "- Never mention IDs or technical details\n\n"
+                "## Medical Safety\n"
+                "- NO diagnosis. For emergencies (trouble breathing, chest pain, seizures, severe bleeding, unconsciousness), tell the user to seek emergency care immediately (call 108 / nearest clinic).\n"
+                "- Never fabricate data. Rely strictly on the tools.\n\n"
+                "## Style\n"
+                "- Use short, clear sentences.\n"
+                "- Before calling a tool, say what you are doing (e.g., 'I'm checking your household records now.').\n"
+                "- Be calm, empathetic, and encouraging."
+            )
+        else:
+            system_prompt = (
+                f"You are the WellSync health assistant for the {household_name} family. "
+                f"Your household ID is: {h_id}. "
+                f"STRICT RULE: The user prefers {target_lang_name}. You MUST respond ONLY in {target_lang_name}. "
+                f"DYNAMIC CONTEXT: This household has children: {child_context_str}. "
+                "RULES FOR ANSWERING:\n"
+                f"1. FIRST: Call `get_household_dependents` with household_id={h_id} to get the list of children with their IDs.\n"
+                "2. If the user asks about their child and they only have ONE child, use that child's ID.\n"
+                "3. If they have MULTIPLE children and don't specify, politely ask which child they mean.\n"
+                "4. If they ask about a specific name (e.g., 'Arnav'), use the ID returned by `get_household_dependents`.\n"
+                "5. NEVER speak or display IDs (dependent_id, household_id, UUIDs) to the user. Use only names.\n"
+                "6. If `get_household_dependents` returned a list of children, you HAVE those names—use them directly.\n"
+                "CRITICAL: You DO have access to their health records. Use tools to retrieve real data.\n"
+                f"IMPORTANT: Always pass household_id={h_id} when calling any tool that requires it.\n"
+                "\n\nGoals:\n"
+                "- Discuss exact vaccination status by querying tools with the correct dependent ID.\n"
+                "- Record when a health event or vaccine has been completed by the user.\n"
+                "- Provide clear, simple health education.\n"
+                "\n\nMedical Safety:\n"
+                "- NO diagnosis. If emergency (e.g. trouble breathing), instruct to seek immediate medical care.\n"
+                "- Never fabricate data. Rely strictly on the tools and DYNAMIC CONTEXT.\n"
+                "\n\nStyle: Simple, short sentences. Confirm actions."
+            )
+
         assistant_config = {
             "firstMessage": first_message,
             "transcriber": {
@@ -396,29 +467,7 @@ async def vapi_tool_call(request: Request) -> dict[str, Any]:
                 "messages": [
                     {
                         "role": "system",
-                        "content": (
-                            f"You are the WellSync health assistant for the {household_name} family. "
-                            f"Your household ID is: {h_id}. "
-                            f"STRICT RULE: The user prefers {target_lang_name}. You MUST respond ONLY in {target_lang_name}. "
-                            f"DYNAMIC CONTEXT: This household has children: {child_context_str}. "
-                            "RULES FOR ANSWERING:\n"
-                            f"1. FIRST: Call `get_household_dependents` with household_id={h_id} to get the list of children with their IDs.\n"
-                            "2. If the user asks about their child and they only have ONE child, use that child's ID.\n"
-                            "3. If they have MULTIPLE children and don't specify, politely ask which child they mean.\n"
-                            "4. If they ask about a specific name (e.g., 'Arnav'), use the ID returned by `get_household_dependents`.\n"
-                            "5. NEVER speak or display IDs (dependent_id, household_id, UUIDs) to the user. Use only names.\n"
-                            "6. If `get_household_dependents` returned a list of children, you HAVE those names—use them directly.\n"
-                            "CRITICAL: You DO have access to their health records. Use tools to retrieve real data.\n"
-                            f"IMPORTANT: Always pass household_id={h_id} when calling any tool that requires it.\n"
-                            "\n\nGoals:\n"
-                            "- Discuss exact vaccination status by querying tools with the correct dependent ID.\n"
-                            "- Record when a health event or vaccine has been completed by the user.\n"
-                            "- Provide clear, simple health education.\n"
-                            "\n\nMedical Safety:\n"
-                            "- NO diagnosis. If emergency (e.g. trouble breathing), instruct to seek immediate medical care.\n"
-                            "- Never fabricate data. Rely strictly on the tools and DYNAMIC CONTEXT.\n"
-                            "\n\nStyle: Simple, short sentences. Confirm actions."
-                        ),
+                        "content": system_prompt,
                     }
                 ],
                 "tools": [
