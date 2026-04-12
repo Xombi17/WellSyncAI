@@ -211,7 +211,10 @@ async def vapi_webhook(
             }
             language_name = language_name_map.get(lang, "English")
 
-        # 🔥 FIX: Ensure session is defined for fallback lookup
+        # Use language_name for target_lang_name to ensure it's always set
+        target_lang_name = language_name
+
+        # Fallback: if no household_id, try to get from database (for testing)
         if not h_id:
             async for session in get_session():
                 h_stmt = select(Household).where(Household.username == "verma")
@@ -219,10 +222,10 @@ async def vapi_webhook(
                 fallback_h = h_res.scalar_one_or_none()
                 if fallback_h:
                     h_id = fallback_h.id
-                    log.info("voice_fallback_id_used", household=fallback_h.name)
+                    log.info("voice_fallback_household_used", household=fallback_h.name)
                 break
 
-        print(f"DEBUG: Vapi Webhook [{event_type}]. household_id: {h_id}, lang: {lang}")
+        print(f"DEBUG: Vapi Webhook [{event_type}]. household_id: {h_id}, lang: {lang}, language_name: {language_name}")
 
         first_messages = {
             "en": "Hello! I'm your WellSync health assistant.",
