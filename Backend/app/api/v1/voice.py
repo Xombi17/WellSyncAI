@@ -17,7 +17,7 @@ Protection:
 import hashlib
 import hmac
 import time
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 import structlog
@@ -28,7 +28,7 @@ from sqlmodel import select
 from app.core.config import get_settings
 from app.core.database import get_session
 from app.models.dependent import Dependent
-from app.models.health_event import EventStatus, HealthEvent
+from app.models.health_event import EventCategory, EventStatus, HealthEvent
 from app.models.household import Household
 from app.models.conversation import Conversation
 from app.services.ai_service import answer_voice_question
@@ -43,13 +43,23 @@ router = APIRouter(prefix="/voice", tags=["Voice (Vapi)"])
 
 _processed_calls: dict[str, float] = {}
 _rate_limit_cache: dict[str, float] = {}
+_tool_result_cache: dict[str, tuple[float, str]] = {}  # NEW: Cache tool results
 RATE_LIMIT_WINDOW = 5.0  # seconds
 IDEMPOTENCY_TTL = 300.0  # 5 minutes
+TOOL_CACHE_TTL = 60.0  # 1 minute - cache tool results during a call
 
 
 def _get_call_key(call_id: str, tool_name: str) -> str:
     """Generate idempotency key for a tool call."""
     return f"{tool_name}:{call_id}"
+
+
+def _get_tool_cache_key(tool_name: str, args: dict[str, Any]) -> str:
+    """Generate cache key for tool results based on tool name and args."""
+    import json
+    # Sort args for consistent hashing
+    args_str = json.dumps(args, sort_keys=True)
+    return f"{tool_name}:{args_str}"
 
 
 def _is_duplicate_call(call_id: str, tool_name: str) -> bool:
@@ -93,10 +103,14 @@ def _cleanup_old_entries() -> None:
     for k in expired_limits:
         del _rate_limit_cache[k]
 
+    expired_cache = [k for k, (t, _) in _tool_result_cache.items() if now - t > TOOL_CACHE_TTL]
+    for k in expired_cache:
+        del _tool_result_cache[k]
+
 
 async def _ensure_cleanup() -> None:
     """Periodically clean up old cache entries."""
-    if len(_processed_calls) > 1000 or len(_rate_limit_cache) > 1000:
+    if len(_processed_calls) > 1000 or len(_rate_limit_cache) > 1000 or len(_tool_result_cache) > 100:
         _cleanup_old_entries()
 
 
@@ -139,6 +153,7 @@ async def vapi_webhook(
     Receives tool-call events and returns structured data for the voice agent.
     Includes rate limiting and idempotency protection.
     """
+    start_time = time.time()
     body = await request.body()
 
     if not _verify_vapi_signature(body, x_vapi_signature):
@@ -161,25 +176,51 @@ async def vapi_webhook(
         results = []
 
         for call in tool_calls:
+            tool_start = time.time()
             cid = call.get("id", "")
             tool_name = call.get("function", {}).get("name", "")
             tool_args = call.get("function", {}).get("arguments", {})
+
+            log.info(
+                "tool_call_received",
+                call_id=call_id,
+                tool_call_id=cid,
+                tool_name=tool_name,
+                args=tool_args,
+            )
 
             if _is_duplicate_call(cid, tool_name):
                 results.append({"toolCallId": cid, "result": "[Duplicate request - already processed]"})
                 continue
 
+            # Check cache for repeated tool calls with same args
+            cache_key = _get_tool_cache_key(tool_name, tool_args)
+            now = time.time()
+            if cache_key in _tool_result_cache:
+                cached_time, cached_result = _tool_result_cache[cache_key]
+                if now - cached_time < TOOL_CACHE_TTL:
+                    log.info("tool_result_cache_hit", tool=tool_name, age_seconds=int(now - cached_time))
+                    results.append({"toolCallId": cid, "result": cached_result})
+                    continue
+
             result_text = ""
             async for session in get_session():
-                result_text = await _handle_tool_call(tool_name, tool_args, session)
+                result_text = await _handle_tool_call(tool_name, tool_args, session, call_id)
                 household_id = tool_args.get("household_id", "")
                 question = tool_args.get("question", "")
                 if household_id and question:
                     await _record_interaction(household_id, question, result_text, session)
                 break
 
+            # Cache the result
+            _tool_result_cache[cache_key] = (now, result_text)
+
+            tool_duration = time.time() - tool_start
+            log.info("tool_call_completed", tool=tool_name, duration_ms=int(tool_duration * 1000))
             results.append({"toolCallId": cid, "result": result_text})
 
+        total_duration = time.time() - start_time
+        log.info("webhook_response_time", event=event_type, duration_ms=int(total_duration * 1000))
         return {"results": results}
 
     elif event_type == "assistant-request":
@@ -412,6 +453,77 @@ async def vapi_webhook(
                             },
                         },
                     },
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "record_medicine_taken",
+                            "description": "Mark a medicine dose as taken/completed.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "event_id": {
+                                        "type": "string",
+                                        "description": "The medicine dose event ID.",
+                                    },
+                                },
+                                "required": ["event_id"],
+                            },
+                        },
+                    },
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "record_growth",
+                            "description": "Record growth measurements (weight, height, head circumference, milestones) for a child.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "dependent_id": {
+                                        "type": "string",
+                                        "description": "The child's ID.",
+                                    },
+                                    "weight_kg": {
+                                        "type": "number",
+                                        "description": "Weight in kilograms (optional).",
+                                    },
+                                    "height_cm": {
+                                        "type": "number",
+                                        "description": "Height in centimeters (optional).",
+                                    },
+                                    "head_circumference_cm": {
+                                        "type": "number",
+                                        "description": "Head circumference in cm (optional, for 0-2 years).",
+                                    },
+                                    "milestone_achieved": {
+                                        "type": "string",
+                                        "description": "Developmental milestone achieved (optional).",
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "Additional notes (optional).",
+                                    },
+                                },
+                                "required": ["dependent_id"],
+                            },
+                        },
+                    },
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "check_pregnancy_status",
+                            "description": "Get current pregnancy status including week, trimester, and days until due date.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "household_id": {
+                                        "type": "string",
+                                        "description": "The household ID.",
+                                    },
+                                },
+                                "required": ["household_id"],
+                            },
+                        },
+                    },
                 ],
             },
             "assistantOverrides": {
@@ -432,12 +544,24 @@ async def _handle_tool_call(
     tool_name: str,
     args: dict[str, Any],
     session,
+    call_id: str = "unknown",
 ) -> str:
     """Dispatch tool call to appropriate handler with DB context."""
 
+    # CRITICAL: Always use args.get() to read household_id from function arguments
+    # Never read from session/auth state
+    household_id = args.get("household_id", "")
+
+    log.info(
+        "tool_handler_start",
+        tool=tool_name,
+        call_id=call_id,
+        household_id=household_id,
+        args_keys=list(args.keys()),
+    )
+
     if tool_name == "answer_health_question":
         question = args.get("question", "")
-        household_id = args.get("household_id", "")
         dependent_id = args.get("dependent_id", "")
         language = args.get("language", "en")
 
@@ -452,12 +576,11 @@ async def _handle_tool_call(
         return await answer_voice_question(question, context, language)
 
     if tool_name == "get_household_dependents":
-        household_id = args.get("household_id", "")
-        return await _get_dependents_for_household(household_id, session)
+        return await _get_dependents_for_household(household_id, session, call_id)
 
     if tool_name == "get_timeline_summary":
         dependent_id = args.get("dependent_id", "")
-        return await _get_timeline_summary(dependent_id, session)
+        return await _get_timeline_summary(dependent_id, session, call_id)
 
     if tool_name == "get_next_vaccine":
         dependent_id = args.get("dependent_id", "")
@@ -472,7 +595,6 @@ async def _handle_tool_call(
         dependent_id = args.get("dependent_id", "")
         # If no child specified or not a valid UUID length, try to resolve by name
         if not dependent_id or len(dependent_id) < 10:
-            household_id = args.get("household_id", "")
             if household_id:
                 res = await session.execute(select(Dependent).where(Dependent.household_id == household_id))
                 deps = res.scalars().all()
@@ -486,12 +608,31 @@ async def _handle_tool_call(
                             break
 
         if not dependent_id or len(dependent_id) < 10:
-            return "I need to know which child you are asking about. Please provide their exact ID or name."
+            return '{"error": "I need to know which child you are asking about. Please provide their name."}'
 
-        return await _get_timeline_summary(dependent_id, session)
+        return await _get_timeline_summary(dependent_id, session, call_id)
+
+    if tool_name == "record_medicine_taken":
+        event_id = args.get("event_id", "")
+        return await _record_medicine_taken(event_id, session)
+
+    if tool_name == "record_growth":
+        dependent_id = args.get("dependent_id", "")
+        weight_kg = args.get("weight_kg")
+        height_cm = args.get("height_cm")
+        head_circumference_cm = args.get("head_circumference_cm")
+        milestone_achieved = args.get("milestone_achieved")
+        notes = args.get("notes", "")
+        return await _record_growth(
+            dependent_id, household_id, weight_kg, height_cm,
+            head_circumference_cm, milestone_achieved, notes, session
+        )
+
+    if tool_name == "check_pregnancy_status":
+        return await _check_pregnancy_status(household_id, session)
 
     log.warning("vapi_unknown_tool", tool_name=tool_name)
-    return "I'm sorry, I couldn't process that request. Please consult a healthcare worker."
+    return '{"error": "Unknown tool requested"}'
 
 
 async def _build_health_context(
@@ -603,66 +744,111 @@ async def _get_conversation_history(household_id: str, session, limit: int = 6) 
         return []
 
 
-async def _get_dependents_for_household(household_id: str, session) -> str:
-    """Return a list of dependents (children) for a household as JSON."""
+async def _get_dependents_for_household(household_id: str, session, call_id: str = "unknown") -> str:
+    """Return a list of dependents (children) for a household as strict JSON. Optimized for speed."""
     import json
 
-    result = await session.execute(select(Dependent).where(Dependent.household_id == household_id))
-    dependents = result.scalars().all()
+    query_start = time.time()
 
-    if not dependents:
-        return json.dumps({"dependents": [], "message": "No children found in this household."})
-
-    children = []
-    today = date.today()
-    for d in dependents:
-        age_days = (today - d.date_of_birth).days
-        if age_days < 30:
-            age_months = 0
-        elif age_days < 365:
-            age_months = age_days // 30
-        else:
-            age_months = (age_days // 365) * 12 + (age_days % 365) // 30
-        children.append(
-            {
-                "name": d.name,
-                "ageMonths": age_months,
-                "dependent_id": d.id,
-            }
+    try:
+        log.info(
+            "dependents_query_start",
+            call_id=call_id,
+            household_id=household_id,
+            query="SELECT * FROM dependents WHERE household_id = ?",
         )
 
-    return json.dumps({"dependents": children})
+        result = await session.execute(select(Dependent).where(Dependent.household_id == household_id))
+        dependents = result.scalars().all()
+
+        query_duration = time.time() - query_start
+        log.info(
+            "dependents_query_complete",
+            call_id=call_id,
+            household_id=household_id,
+            count=len(dependents),
+            duration_ms=int(query_duration * 1000),
+        )
+
+        if not dependents:
+            return json.dumps({"dependents": [], "message": "No children found in this household."})
+
+        children = []
+        today = date.today()
+        for d in dependents:
+            age_days = (today - d.date_of_birth).days
+            if age_days < 30:
+                age_months = 0
+            elif age_days < 365:
+                age_months = age_days // 30
+            else:
+                age_months = (age_days // 365) * 12 + (age_days % 365) // 30
+            children.append(
+                {
+                    "name": d.name,
+                    "ageMonths": age_months,
+                    "dependent_id": d.id,
+                }
+            )
+
+        result_json = json.dumps({"dependents": children})
+        log.info("dependents_result", call_id=call_id, household_id=household_id, result_length=len(result_json))
+        return result_json
+
+    except Exception as e:
+        log.error("dependents_fetch_failed", call_id=call_id, household_id=household_id, error=str(e))
+        return json.dumps({"dependents": [], "error": "Failed to fetch children"})
 
 
-async def _get_timeline_summary(dependent_id: str, session) -> str:
-    """Return a summary of the child's health timeline."""
-    result = await session.execute(
-        select(HealthEvent).where(HealthEvent.dependent_id == dependent_id).order_by(HealthEvent.due_date)
-    )
-    events = result.scalars().all()
+async def _get_timeline_summary(dependent_id: str, session, call_id: str = "unknown") -> str:
+    """Return a summary of the child's health timeline as strict JSON."""
+    import json
 
-    if not events:
-        return "No health events found. Please add the child first."
+    query_start = time.time()
 
-    overdue = [e for e in events if e.status == EventStatus.overdue]
-    due = [e for e in events if e.status == EventStatus.due]
-    upcoming = [e for e in events if e.status == EventStatus.upcoming]
-    completed = [e for e in events if e.status == EventStatus.completed]
+    try:
+        log.info(
+            "timeline_query_start",
+            call_id=call_id,
+            dependent_id=dependent_id,
+        )
 
-    summary = [
-        f"Total vaccines: {len(events)}",
-        f"Completed: {len(completed)}",
-        f"Due now: {len(due)}",
-        f"Overdue: {len(overdue)}",
-        f"Upcoming: {len(upcoming)}",
-    ]
+        result = await session.execute(
+            select(HealthEvent).where(HealthEvent.dependent_id == dependent_id).order_by(HealthEvent.due_date)
+        )
+        events = result.scalars().all()
 
-    if overdue:
-        summary.append(f"\n⚠️ OVERDUE: {', '.join([e.name for e in overdue])}")
-    if due:
-        summary.append(f"\n📅 Due this week: {', '.join([e.name for e in due])}")
+        query_duration = time.time() - query_start
+        log.info(
+            "timeline_query_complete",
+            call_id=call_id,
+            dependent_id=dependent_id,
+            total_events=len(events),
+            duration_ms=int(query_duration * 1000),
+        )
 
-    return " | ".join(summary)
+        if not events:
+            return json.dumps({"total": 0, "completed": 0, "dueNow": [], "overdue": [], "upcoming": []})
+
+        overdue = [{"vaccine": e.name, "dose": e.dose_number or 1, "dueDate": str(e.due_date)} for e in events if e.status == EventStatus.overdue]
+        due = [{"vaccine": e.name, "dose": e.dose_number or 1, "dueDate": str(e.due_date)} for e in events if e.status == EventStatus.due]
+        upcoming = [{"vaccine": e.name, "dose": e.dose_number or 1, "dueDate": str(e.due_date)} for e in events if e.status == EventStatus.upcoming]
+        completed = [e for e in events if e.status == EventStatus.completed]
+
+        result_json = json.dumps({
+            "total": len(events),
+            "completed": len(completed),
+            "dueNow": due,
+            "overdue": overdue,
+            "upcoming": upcoming[:5],  # Limit to next 5 upcoming
+        })
+
+        log.info("timeline_result", call_id=call_id, dependent_id=dependent_id, result_length=len(result_json))
+        return result_json
+
+    except Exception as e:
+        log.error("timeline_fetch_failed", call_id=call_id, dependent_id=dependent_id, error=str(e))
+        return json.dumps({"error": "Failed to fetch timeline"})
 
 
 async def _get_next_vaccine(dependent_id: str, session) -> str:
@@ -735,3 +921,109 @@ async def _mark_event_completed(
 
     log.info("health_event_completed_via_voice", event=target.name, dependent=dependent_id)
     return f"Excellent! I have marked {target.name} as completed. Their health history is now updated."
+
+
+async def _record_medicine_taken(event_id: str, session) -> str:
+    """Mark a medicine dose event as completed."""
+    import json
+
+    event = await session.get(HealthEvent, event_id)
+    if not event:
+        return json.dumps({"error": "Medicine dose event not found"})
+
+    if event.category != EventCategory.medicine_dose:
+        return json.dumps({"error": "This is not a medicine dose event"})
+
+    event.status = EventStatus.completed
+    event.completed_at = datetime.utcnow()
+    session.add(event)
+    await session.commit()
+
+    log.info("medicine_dose_completed_via_voice", event_id=event_id)
+    return json.dumps({
+        "success": True,
+        "message": f"Great! I've recorded that you took {event.name}."
+    })
+
+
+async def _record_growth(
+    dependent_id: str,
+    household_id: str,
+    weight_kg: float | None,
+    height_cm: float | None,
+    head_circumference_cm: float | None,
+    milestone_achieved: str | None,
+    notes: str,
+    session,
+) -> str:
+    """Record a growth measurement via voice."""
+    import json
+    from app.models.growth_record import GrowthRecord
+
+    if not dependent_id:
+        return json.dumps({"error": "Dependent ID is required"})
+
+    # Validate at least one measurement
+    if not any([weight_kg, height_cm, head_circumference_cm, milestone_achieved]):
+        return json.dumps({"error": "Please provide at least one measurement or milestone"})
+
+    record = GrowthRecord(
+        dependent_id=dependent_id,
+        household_id=household_id,
+        recorded_date=date.today(),
+        weight_kg=weight_kg,
+        height_cm=height_cm,
+        head_circumference_cm=head_circumference_cm,
+        milestone_achieved=milestone_achieved,
+        notes=notes,
+    )
+
+    session.add(record)
+    await session.commit()
+
+    log.info("growth_recorded_via_voice", dependent_id=dependent_id)
+
+    response_parts = ["Growth recorded successfully!"]
+    if weight_kg:
+        response_parts.append(f"Weight: {weight_kg} kg")
+    if height_cm:
+        response_parts.append(f"Height: {height_cm} cm")
+    if milestone_achieved:
+        response_parts.append(f"Milestone: {milestone_achieved}")
+
+    return json.dumps({
+        "success": True,
+        "message": " ".join(response_parts)
+    })
+
+
+async def _check_pregnancy_status(household_id: str, session) -> str:
+    """Get current pregnancy status for household."""
+    import json
+    from app.models.pregnancy import PregnancyProfile
+
+    if not household_id:
+        return json.dumps({"error": "Household ID is required"})
+
+    stmt = select(PregnancyProfile).where(
+        PregnancyProfile.household_id == household_id,
+        PregnancyProfile.completed == False,
+    )
+    result = await session.execute(stmt)
+    profile = result.scalar_one_or_none()
+
+    if not profile:
+        return json.dumps({
+            "active": False,
+            "message": "No active pregnancy found for this household"
+        })
+
+    return json.dumps({
+        "active": True,
+        "pregnancy_week": profile.pregnancy_week,
+        "trimester": profile.trimester,
+        "days_until_due": profile.days_until_due,
+        "expected_due_date": str(profile.expected_due_date),
+        "message": f"You are {profile.pregnancy_week} weeks pregnant, in trimester {profile.trimester}. "
+                   f"{profile.days_until_due} days until your due date."
+    })
