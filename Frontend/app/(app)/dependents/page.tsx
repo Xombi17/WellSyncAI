@@ -1,34 +1,37 @@
 'use client';
 import Link from 'next/link';
-import { Plus, User, Calendar, Activity, ChevronRight, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getDependents, Dependent } from '@/lib/api';
+import { Plus, User, Calendar, Activity, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { useDependents } from '@/hooks/use-dependents';
 
 export default function DependentsPage() {
-  const [dependents, setDependents] = useState<Dependent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { dependents, isLoading, error } = useDependents();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const storedId = typeof window !== 'undefined' ? localStorage.getItem('household_id') : null;
-        if (storedId) {
-          const data = await getDependents(storedId);
-          setDependents(data);
-        }
-      } catch (error) {
-        console.error('Failed to load dependents:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 max-w-md">
+          <div className="flex items-center gap-3 mb-2">
+            <AlertCircle className="text-red-500" size={24} />
+            <h3 className="font-black text-red-700 dark:text-red-400">Failed to load dependents</h3>
+          </div>
+          <p className="text-red-600 dark:text-red-300 text-sm mb-4">
+            {error instanceof Error ? error.message : 'An error occurred while loading family members'}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }

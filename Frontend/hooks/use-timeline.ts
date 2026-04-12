@@ -59,7 +59,7 @@ export function useTimeline(dependentId: string | null, filters?: TimelineFilter
     }
 
     return events;
-  }, [timelineData?.events, filters?.status, filters?.sortBy]);
+  }, [timelineData?.events, filters]);
 
   // Paginate events
   const paginatedEvents = useMemo(() => {

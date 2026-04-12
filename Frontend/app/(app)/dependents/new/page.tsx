@@ -2,13 +2,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Calendar, FileText, ArrowRight, Activity, Loader2 } from 'lucide-react';
-import { createDependent } from '@/lib/api';
+import { useDependents } from '@/hooks/use-dependents';
 
 export default function AddDependentPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addDependent, isCreating, createError } = useDependents();
   const [error, setError] = useState<string | null>(null);
-  
+
   // Form State
   const [name, setName] = useState('');
   const [type, setType] = useState('child');
@@ -19,35 +19,23 @@ export default function AddDependentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
 
     try {
-      const householdId = localStorage.getItem('household_id');
-      if (!householdId) {
-        throw new Error('No household found. Please sign in again.');
-      }
-
-      const payload = {
-        household_id: householdId,
+      await addDependent({
         name,
-        type: type as any,
-        sex: sex as any,
-        date_of_birth: type === 'pregnant' ? new Date().toISOString().split('T')[0] : dob,
-        expected_delivery_date: type === 'pregnant' ? edd || undefined : undefined,
-        notes: notes || undefined
-      };
+        type: type as 'child' | 'adult' | 'elder' | 'pregnant',
+        sex: sex as 'male' | 'female' | 'other',
+        date_of_birth: type === 'pregnant' ? undefined : dob,
+        expected_delivery_date: type === 'pregnant' ? edd : undefined,
+        notes: notes || undefined,
+      });
 
-      await createDependent(payload);
-      
-      // Force refresh data in components
-      router.push('/dashboard');
+      router.push('/dependents');
       router.refresh();
     } catch (err: any) {
       console.error('Failed to create dependent:', err);
       setError(err.message || 'Failed to add member. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -58,9 +46,9 @@ export default function AddDependentPage() {
         <p className="text-slate-500 dark:text-slate-400 font-bold text-lg">Add a dependent to track their health timeline.</p>
       </div>
 
-      {error && (
+      {(error || createError) && (
         <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/20 border-l-4 border-rose-500 text-rose-700 dark:text-rose-400 font-bold rounded-r-2xl animate-in shake duration-300">
-          {error}
+          {error || (createError instanceof Error ? createError.message : 'Failed to create dependent')}
         </div>
       )}
 
@@ -164,13 +152,13 @@ export default function AddDependentPage() {
           />
         </div>
 
-        <button 
-          type="submit" 
-          disabled={isSubmitting}
+        <button
+          type="submit"
+          disabled={isCreating}
           className="w-full mt-8 bg-blue-400 dark:bg-blue-500 text-white rounded-2xl py-5 font-black text-lg flex items-center justify-center gap-3 transition-all shadow-[6px_6px_12px_rgba(96,165,250,0.3),inset_2px_2px_6px_rgba(255,255,255,0.5),inset_-2px_-2px_6px_rgba(0,0,0,0.1)] dark:shadow-[6px_6px_12px_rgba(0,0,0,0.3),inset_2px_2px_6px_rgba(255,255,255,0.1),inset_-2px_-2px_6px_rgba(0,0,0,0.4)] hover:-translate-y-1 active:translate-y-0.5 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1)] dark:active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)] disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? <Loader2 className="animate-spin" /> : 'Save Member'}
-          {!isSubmitting && <ArrowRight size={24} strokeWidth={3} />}
+          {isCreating ? <Loader2 className="animate-spin" /> : 'Save Member'}
+          {!isCreating && <ArrowRight size={24} strokeWidth={3} />}
         </button>
       </form>
     </div>
