@@ -8,7 +8,9 @@ import { useGeminiVoiceBridge } from '@/lib/gemini-voice';
 
 export function VoiceFAB() {
   const params = useParams();
-  const dependentId = (params?.dependent_id as string) || '';
+  const dependentId = params && typeof params === 'object' && 'dependent_id' in params
+    ? (params.dependent_id as string)
+    : '';
 
   const { isConnected, isConnecting, connect, disconnect } = useGeminiVoiceBridge();
 
