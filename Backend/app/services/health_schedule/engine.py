@@ -6,7 +6,10 @@ Reads from DB for existing events, generates new ones if needed, and
 recomputes status (upcoming/due/overdue) dynamically against today's date.
 """
 
-from datetime import date, datetime
+import json
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -20,6 +23,23 @@ from app.services.health_schedule.rules import generate_child_schedule, get_sche
 # ─────────────────────────────────────────────────────────────────────────────
 
 DUE_WINDOW_DAYS = 7  # "Due" = within 7 days of due_date
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pregnancy schedule loading
+# ─────────────────────────────────────────────────────────────────────────────
+
+_pregnancy_data: dict[str, Any] | None = None
+
+
+def _load_pregnancy_schedule() -> dict[str, Any]:
+    global _pregnancy_data
+    if _pregnancy_data is None:
+        path = Path(__file__).parent.parent.parent / "data" / "pregnancy_schedule.json"
+        if path.exists():
+            _pregnancy_data = json.loads(path.read_text())
+        else:
+            _pregnancy_data = {"events": []}
+    return _pregnancy_data
 
 
 def compute_status(due_date: date, completed: bool, today: date | None = None) -> EventStatus:
@@ -128,3 +148,56 @@ def get_next_due_event(events: list[HealthEvent]) -> HealthEvent | None:
             if event.status == priority:
                 return event
     return None
+
+
+async def generate_pregnancy_schedule(
+    dependent: Dependent,
+    lmp_date: date,  # Last Menstrual Period date
+    session: AsyncSession,
+) -> list[HealthEvent]:
+    """Generate pregnancy care schedule from LMP date."""
+    if dependent.type != DependentType.pregnant:
+        return []
+
+    pregnancy_data = _load_pregnancy_schedule()
+    events_data = pregnancy_data.get("events", [])
+
+    # Fetch existing events
+    result = await session.execute(select(HealthEvent).where(HealthEvent.dependent_id == dependent.id))
+    existing_events = result.scalars().all()
+    existing_keys = {e.schedule_key for e in existing_events}
+
+    today = date.today()
+    new_events: list[HealthEvent] = []
+
+    for e in events_data:
+        if e["key"] in existing_keys:
+            continue
+
+        days_from_lmp = e["weeks_from_lmp"] * 7
+        due_date = lmp_date + timedelta(days=days_from_lmp)
+        window_start = lmp_date + timedelta(days=days_from_lmp + e["window_start_days"])
+        window_end = lmp_date + timedelta(days=days_from_lmp + e["window_end_days"])
+
+        status = compute_status(due_date, completed=False, today=today)
+
+        event = HealthEvent(
+            dependent_id=dependent.id,
+            household_id=dependent.household_id,
+            name=e["name"],
+            schedule_key=e["key"],
+            category=EventCategory(e.get("category", "checkup")),
+            dose_number=e.get("dose", 1),
+            due_date=due_date,
+            window_start=window_start,
+            window_end=window_end,
+            status=status,
+            schedule_version=pregnancy_data.get("version", "pregnancy_v1"),
+        )
+        session.add(event)
+        new_events.append(event)
+
+    await session.flush()
+    all_events = list(existing_events) + new_events
+    all_events.sort(key=lambda e: e.due_date)
+    return all_events

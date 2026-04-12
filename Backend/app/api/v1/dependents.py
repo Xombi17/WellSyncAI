@@ -5,10 +5,10 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
-from app.models.dependent import Dependent
+from app.models.dependent import Dependent, DependentType
 from app.models.household import Household
 from app.schemas.dependent import DependentCreate, DependentResponse, DependentUpdate
-from app.services.health_schedule.engine import generate_and_save_schedule
+from app.services.health_schedule.engine import generate_and_save_schedule, generate_pregnancy_schedule
 
 router = APIRouter(prefix="/dependents", tags=["Dependents"])
 
@@ -28,8 +28,13 @@ async def create_dependent(
     await session.flush()
     await session.refresh(dependent)
 
-    # Auto-generate health schedule on dependent creation
-    await generate_and_save_schedule(dependent, session)
+    # Auto-generate health schedule based on dependent type
+    if dependent.type == DependentType.child:
+        await generate_and_save_schedule(dependent, session)
+    elif dependent.type == DependentType.pregnant:
+        # For pregnant, we need LMP date - use due_date as proxy if provided
+        if dependent.date_of_birth:  # Due date encoded as DOB
+            await generate_pregnancy_schedule(dependent, dependent.date_of_birth, session)
 
     return dependent
 
