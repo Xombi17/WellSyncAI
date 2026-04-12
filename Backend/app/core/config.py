@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     # App
     app_env: str = "development"
     app_host: str = "0.0.0.0"
-    app_port: int = 8000
+    app_port: int = 8080
     log_level: str = "INFO"
 
     # CORS
