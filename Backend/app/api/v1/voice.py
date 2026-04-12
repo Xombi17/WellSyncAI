@@ -156,9 +156,7 @@ async def vapi_webhook(
     x_vapi_signature: str | None = Header(default=None),
 ) -> dict[str, Any]:
     """
-    Main Vapi webhook handler.
-    Receives tool-call events and returns structured data for the voice agent.
-    Includes rate limiting and idempotency protection.
+    Main Vapi webhook handler for status updates and transcripts.
     """
     start_time = time.time()
     body = await request.body()
@@ -173,14 +171,54 @@ async def vapi_webhook(
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
     event_type = payload.get("message", {}).get("type", "")
-
     call_id = payload.get("message", {}).get("callId", "unknown")
-    if call_id != "unknown" and not _check_rate_limit(call_id):
-        raise HTTPException(status_code=429, detail="Rate limit exceeded. Please wait before making another request.")
-
-    await _ensure_cleanup()
 
     log.info("vapi_webhook_received", event_type=event_type, call_id=call_id)
+
+    # Handle status-update and transcript events
+    if event_type in ("status-update", "transcript"):
+        log.info("vapi_event_received", event_type=event_type, call_id=call_id)
+        return {"status": "received"}
+
+    # Unknown event type
+    log.warning("vapi_unknown_event", event_type=event_type)
+    return {"status": "received"}
+
+
+@router.post("/tool")
+async def vapi_tool_call(request: Request) -> dict[str, Any]:
+    """
+    Vapi tool server endpoint - called by Vapi when tools are invoked.
+    This is separate from the webhook and handles actual tool execution.
+    """
+    try:
+        payload = await request.json()
+    except Exception as e:
+        log.error("tool_call_json_parse_failed", error=str(e))
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    tool_name = payload.get("toolName", "")
+    tool_args = payload.get("toolArguments", {})
+    call_id = payload.get("callId", "unknown")
+
+    log.info(
+        "tool_call_received",
+        call_id=call_id,
+        tool_name=tool_name,
+        args=tool_args,
+    )
+
+    result_text = ""
+    async for session in get_session():
+        result_text = await _handle_tool_call(tool_name, tool_args, session, call_id)
+        household_id = tool_args.get("household_id", "")
+        question = tool_args.get("question", "")
+        if household_id and question:
+            await _record_interaction(household_id, question, result_text, session)
+        break
+
+    log.info("tool_call_completed", tool=tool_name, call_id=call_id)
+    return {"result": result_text}
 
     # ── Tool calls: voice agent needs data ────────────────────────────────
     if event_type == "tool-calls":
