@@ -31,10 +31,9 @@ async def lifespan(app: FastAPI):
         log.error("startup_health_check_failed", health=health)
         raise RuntimeError("Startup health check failed. Check environment variables.")
 
-    # Auto-create tables in development (use Alembic for production)
-    if settings.is_dev:
-        await create_db_and_tables()
-        log.info("db_tables_created_or_verified")
+    # Auto-create tables (safe to run multiple times)
+    await create_db_and_tables()
+    log.info("db_tables_created_or_verified")
 
     yield
 
