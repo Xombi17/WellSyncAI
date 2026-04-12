@@ -1,6 +1,6 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, User, Syringe, Stethoscope, Pill, Volume2, ShieldCheck, X as XIcon, Award, Baby, Heart, TrendingUp } from 'lucide-react';
+import { Calendar, User, Syringe, Stethoscope, Pill, Volume2, ShieldCheck, X as XIcon, Award, Baby, Heart, TrendingUp, CheckCircle, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -9,6 +9,8 @@ import { getTimeline, getDependents, type HealthEvent } from '../lib/api';
 import { HealthPassCard } from './HealthPassCard';
 import { getStoredHouseholdId } from '../hooks/use-household';
 import { EmptyState } from './EmptyState';
+import { VerificationModal } from './VerificationModal';
+import { useVerification } from '../hooks/use-verification';
 
 const categoryIcons = {
   vaccination: Syringe,
@@ -55,8 +57,11 @@ export function TimelineFeed() {
   const searchParams = useSearchParams();
   const [showPass, setShowPass] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [selectedEventForVerification, setSelectedEventForVerification] = useState<HealthEvent | null>(null);
   const householdId = getStoredHouseholdId();
   const currentDependentId = searchParams.get('dependent');
+  const { verifyVaccinationAsync, isVerifying } = useVerification();
 
   const { data: timelineData, isLoading } = useQuery({
     queryKey: ['timeline', searchParams.get('dependent'), householdId, selectedCategory],
@@ -254,7 +259,7 @@ export function TimelineFeed() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h3 className="text-xl font-bold text-slate-800 dark:text-white truncate">
                       {event.name}
                       {event.dose_number && <span className="ml-2 text-xs bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-lg">Dose {event.dose_number}</span>}
@@ -262,30 +267,98 @@ export function TimelineFeed() {
                     <span className={`text-xs font-bold px-3 py-1.5 rounded-xl uppercase ${statusStyles[colorKey]}`}>
                       {event.status}
                     </span>
+                    {event.verification_status === 'verified' && (
+                      <span className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle size={14} strokeWidth={2.5} />
+                        Verified
+                      </span>
+                    )}
+                    {event.verification_status === 'pending' && event.marked_given_at && (
+                      <span className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+                        <Clock size={14} strokeWidth={2.5} />
+                        Pending
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-5 text-sm font-medium text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-5 text-sm font-medium text-slate-500 dark:text-slate-400 flex-wrap">
                     <span className="flex items-center gap-1.5 bg-white dark:bg-slate-700 px-3 py-1.5 rounded-xl">
                       <User size={16} className="text-blue-400"/> {dependentName}
                     </span>
                     <span className="flex items-center gap-1.5 leading-none">
-                      <Calendar size={16} className="text-blue-400"/> 
+                      <Calendar size={16} className="text-blue-400"/>
                       {new Date(event.due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
+                    {event.verified_by && (
+                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs">
+                        <ShieldCheck size={14} strokeWidth={2.5} />
+                        Verified by {event.verified_by}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => speak(event)}
-                  className="w-full sm:w-auto mt-4 sm:mt-0 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 rounded-2xl py-4 px-8 font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Volume2 size={20} strokeWidth={3} />
-                  <span>Listen</span>
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => speak(event)}
+                    className="bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 rounded-2xl py-3 px-6 font-bold flex items-center justify-center gap-2 transition-all text-sm"
+                  >
+                    <Volume2 size={18} strokeWidth={3} />
+                    <span>Listen</span>
+                  </button>
+
+                  {event.status !== 'completed' && event.verification_status === 'pending' && !event.marked_given_at && (
+                    <button
+                      onClick={() => {
+                        setSelectedEventForVerification(event);
+                        setVerificationModalOpen(true);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white rounded-2xl py-3 px-6 font-bold flex items-center justify-center gap-2 transition-all text-sm"
+                    >
+                      <CheckCircle size={18} strokeWidth={3} />
+                      <span>Mark Given</span>
+                    </button>
+                  )}
+
+                  {event.marked_given_at && event.verification_status === 'pending' && (
+                    <button
+                      onClick={() => {
+                        setSelectedEventForVerification(event);
+                        setVerificationModalOpen(true);
+                      }}
+                      disabled={isVerifying}
+                      className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-400 text-white rounded-2xl py-3 px-6 font-bold flex items-center justify-center gap-2 transition-all text-sm"
+                    >
+                      <ShieldCheck size={18} strokeWidth={3} />
+                      <span>{isVerifying ? 'Verifying...' : 'Verify'}</span>
+                    </button>
+                  )}
+                </div>
               </motion.div>
             );
           })
         )}
       </div>
+
+      {selectedEventForVerification && (
+        <VerificationModal
+          event={selectedEventForVerification}
+          isOpen={verificationModalOpen}
+          onClose={() => {
+            setVerificationModalOpen(false);
+            setSelectedEventForVerification(null);
+          }}
+          onSubmit={async (data) => {
+            if (currentDependentId && selectedEventForVerification) {
+              await verifyVaccinationAsync({
+                dependentId: currentDependentId,
+                eventId: selectedEventForVerification.id,
+                data,
+              });
+            }
+          }}
+          isLoading={isVerifying}
+        />
+      )}
     </section>
   );
 }
