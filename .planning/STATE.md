@@ -1,6 +1,6 @@
 # WellSync AI — State
 
-**Last updated:** 2026-04-12
+**Last updated:** 2026-04-12T20:06:26Z
 
 ## Project
 
@@ -13,17 +13,17 @@
 ## Current Status
 
 - **Phase:** 2 (of 5)
-- **Progress:** 35%
+- **Progress:** 40%
 - **Status:** active
-- **Plans completed:** 2 of ~10
+- **Plans completed:** 3 of ~10
 - **Current Phase Status:**
   - Phase 1: Backend Foundation — In Progress (Now verifying with Supabase)
-  - Phase 2: Frontend Core — In Progress
+  - Phase 2: Frontend Core — In Progress (02-01 Complete ✅)
   - Phase 3: Voice & AI — Implemented (Unified to Gemini Live)
   - Phase 4: Offline PWA — Not Started
   - Phase 5: Deployment & Launch — Not Started
   - Phase 6: Database Migration (Supabase) — Completed ✅
-- **Last activity:** 2026-04-12 - Completed quick task 260412-iaq: Fix regional language voice support - Deepgram multi mode + Azure voices
+- **Last activity:** 2026-04-12 - Completed plan 02-01: Frontend Core (Auth, CRUD, Tests, CI/CD)
 
 ## Phase Details
 
@@ -49,11 +49,14 @@
 
 ### Phase 2: Frontend Core
 
-**Status:** pending
+**Status:** in-progress
 
 **Goal:** Build Next.js frontend with authentication, household management, and health timeline display
 
 **Requirements:** HH-01 to HL-09 (9 requirements)
+
+**Completed Plans:**
+- 02-01: Frontend Core (Auth, CRUD, Tests, CI/CD) ✅ 2026-04-12
 
 ---
 
