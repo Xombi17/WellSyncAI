@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
     ],
   },
   transpilePackages: ['motion'],
-  serverExternalPackages: ['node-fetch', 'undici'],
+  serverExternalPackages: [],
   output: 'standalone',
 };
 
