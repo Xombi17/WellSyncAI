@@ -47,6 +47,11 @@ export interface HealthEvent {
   completed_by?: string;
   location?: string;
   notes?: string;
+  verification_status?: 'pending' | 'verified' | 'rejected';
+  verified_by?: string;
+  verification_document_url?: string;
+  verification_notes?: string;
+  marked_given_at?: string;
   schedule_version: string;
   created_at: string;
   updated_at: string;
