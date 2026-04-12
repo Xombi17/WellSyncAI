@@ -266,6 +266,12 @@ async def vapi_webhook(
             "model": {
                 "provider": "openai",
                 "model": "gpt-4o",
+                "toolChoices": {
+                    "directThrough": {
+                        "toolName": "get_household_dependents",
+                        "toolArguments": {},
+                    }
+                },
                 "messages": [
                     {
                         "role": "system",
