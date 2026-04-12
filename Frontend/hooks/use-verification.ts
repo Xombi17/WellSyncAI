@@ -24,11 +24,11 @@ export function useVerification() {
       dependentId: string;
       eventId: string;
     }): Promise<HealthEvent> => {
-      const response = await apiClient.post(
+      const response = await apiClient.post<HealthEvent>(
         `/timeline/${dependentId}/events/${eventId}/mark-given`,
         {}
       );
-      return response.data;
+      return response.data as HealthEvent;
     },
     onSuccess: (_, { dependentId }) => {
       queryClient.invalidateQueries({ queryKey: ['timeline', dependentId] });
@@ -45,11 +45,11 @@ export function useVerification() {
       eventId: string;
       data: VerifyVaccinationRequest;
     }): Promise<HealthEvent> => {
-      const response = await apiClient.post(
+      const response = await apiClient.post<HealthEvent>(
         `/timeline/${dependentId}/events/${eventId}/verify`,
         data
       );
-      return response.data;
+      return response.data as HealthEvent;
     },
     onSuccess: (_, { dependentId }) => {
       queryClient.invalidateQueries({ queryKey: ['timeline', dependentId] });
