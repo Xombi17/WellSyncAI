@@ -129,8 +129,8 @@ export function useLiveAPI() {
     setTranscript([]);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey) throw new Error('Gemini API Key is missing.');
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey) throw new Error('Google AI/Gemini API Key is missing.');
 
       const ai = new GoogleGenAI({ apiKey });
 
