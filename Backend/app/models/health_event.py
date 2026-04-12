@@ -12,6 +12,12 @@ class EventStatus(str, Enum):
     completed = "completed"
 
 
+class VerificationStatus(str, Enum):
+    pending = "pending"
+    verified = "verified"
+    rejected = "rejected"
+
+
 class EventCategory(str, Enum):
     vaccination = "vaccination"
     checkup = "checkup"
@@ -54,6 +60,13 @@ class HealthEvent(SQLModel, table=True):
     location: str | None = Field(default=None, max_length=200, description="Where it was done")
 
     notes: str | None = Field(default=None, max_length=500)
+
+    # Verification fields (for ASHA worker verification)
+    verification_status: VerificationStatus = Field(default=VerificationStatus.pending)
+    verified_by: str | None = Field(default=None, max_length=200, description="ASHA worker name")
+    verification_document_url: str | None = Field(default=None, max_length=500, description="URL to verification document")
+    verification_notes: str | None = Field(default=None, max_length=500, description="Notes from verification")
+    marked_given_at: datetime | None = Field(default=None, description="When marked as given by parent")
 
     # Schedule engine versioning
     schedule_version: str = Field(default="india_nis_v1", max_length=50)

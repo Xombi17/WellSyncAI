@@ -5,8 +5,14 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
 from app.models.dependent import Dependent
-from app.models.health_event import EventStatus, HealthEvent
-from app.schemas.timeline import HealthEventResponse, MarkCompleteRequest, TimelineResponse
+from app.models.health_event import EventStatus, HealthEvent, VerificationStatus
+from app.schemas.timeline import (
+    HealthEventResponse,
+    MarkCompleteRequest,
+    MarkGivenRequest,
+    TimelineResponse,
+    VerifyVaccinationRequest,
+)
 from app.services.health_schedule.engine import (
     generate_and_save_schedule,
     get_next_due_event,
@@ -73,6 +79,50 @@ async def mark_event_complete(
     event.location = body.location
     if body.notes:
         event.notes = body.notes
+    event.updated_at = datetime.utcnow()
+    session.add(event)
+    await session.flush()
+    await session.refresh(event)
+    return event
+
+
+@router.post("/{dependent_id}/events/{event_id}/mark-given", response_model=HealthEventResponse)
+async def mark_vaccination_given(
+    dependent_id: str,
+    event_id: str,
+    body: MarkGivenRequest,
+    session: AsyncSession = Depends(get_session),
+) -> HealthEvent:
+    """Mark a vaccination as given by parent (pending ASHA verification)."""
+    event = await session.get(HealthEvent, event_id)
+    if not event or event.dependent_id != dependent_id:
+        raise HTTPException(status_code=404, detail="Health event not found")
+
+    event.marked_given_at = datetime.utcnow()
+    event.verification_status = VerificationStatus.pending
+    event.updated_at = datetime.utcnow()
+    session.add(event)
+    await session.flush()
+    await session.refresh(event)
+    return event
+
+
+@router.post("/{dependent_id}/events/{event_id}/verify", response_model=HealthEventResponse)
+async def verify_vaccination(
+    dependent_id: str,
+    event_id: str,
+    body: VerifyVaccinationRequest,
+    session: AsyncSession = Depends(get_session),
+) -> HealthEvent:
+    """Verify a vaccination by ASHA worker."""
+    event = await session.get(HealthEvent, event_id)
+    if not event or event.dependent_id != dependent_id:
+        raise HTTPException(status_code=404, detail="Health event not found")
+
+    event.verification_status = VerificationStatus.verified
+    event.verified_by = body.verified_by
+    event.verification_notes = body.verification_notes
+    event.verification_document_url = body.verification_document_url
     event.updated_at = datetime.utcnow()
     session.add(event)
     await session.flush()

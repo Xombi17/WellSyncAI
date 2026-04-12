@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel
 
-from app.models.health_event import EventCategory, EventStatus
+from app.models.health_event import EventCategory, EventStatus, VerificationStatus
 
 
 class HealthEventResponse(BaseModel):
@@ -21,6 +21,11 @@ class HealthEventResponse(BaseModel):
     completed_by: str | None
     location: str | None
     notes: str | None
+    verification_status: VerificationStatus
+    verified_by: str | None
+    verification_document_url: str | None
+    verification_notes: str | None
+    marked_given_at: datetime | None
     schedule_version: str
     created_at: datetime
     updated_at: datetime
@@ -40,3 +45,15 @@ class MarkCompleteRequest(BaseModel):
     completed_by: str | None = None
     location: str | None = None
     notes: str | None = None
+
+
+class MarkGivenRequest(BaseModel):
+    """Request to mark a vaccination as given by parent"""
+    pass
+
+
+class VerifyVaccinationRequest(BaseModel):
+    """Request to verify a vaccination by ASHA worker"""
+    verified_by: str
+    verification_notes: str | None = None
+    verification_document_url: str | None = None
