@@ -588,34 +588,32 @@ async def _get_conversation_history(household_id: str, session, limit: int = 6) 
 
 
 async def _get_dependents_for_household(household_id: str, session) -> str:
-    """Return a list of dependents (children) for a household."""
+    """Return a list of dependents (children) for a household as JSON."""
+    import json
+
     result = await session.execute(select(Dependent).where(Dependent.household_id == household_id))
     dependents = result.scalars().all()
 
     if not dependents:
-        return '{"dependents": [], "message": "No children found in this household."}'
+        return json.dumps({"dependents": [], "message": "No children found in this household."})
 
     children = []
     today = date.today()
     for d in dependents:
         age_days = (today - d.date_of_birth).days
         if age_days < 30:
-            age_str = f"{age_days} days"
+            age_months = 0
         elif age_days < 365:
-            age_str = f"{age_days // 30} months"
+            age_months = age_days // 30
         else:
-            years = age_days // 365
-            age_str = f"{years} years"
+            age_months = (age_days // 365) * 12 + (age_days % 365) // 30
         children.append(
             {
                 "name": d.name,
-                "date_of_birth": str(d.date_of_birth),
-                "age": age_str,
+                "ageMonths": age_months,
                 "dependent_id": d.id,
             }
         )
-
-    import json
 
     return json.dumps({"dependents": children})
 
