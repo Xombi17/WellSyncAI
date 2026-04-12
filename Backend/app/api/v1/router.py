@@ -7,6 +7,7 @@ from app.api.v1 import (
     health_tips,
     households,
     medicine,
+    notifications,
     reminders,
     sync,
     timeline,
@@ -28,3 +29,4 @@ router.include_router(ai.router)
 router.include_router(voice.router)
 router.include_router(sync.router)
 router.include_router(health_tips.router)
+router.include_router(notifications.router)

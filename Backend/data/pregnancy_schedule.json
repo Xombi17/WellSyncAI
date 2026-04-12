@@ -1,0 +1,150 @@
+{
+  "version": "pregnancy_schedule_v1",
+  "source": "India Ministry of Health and Family Welfare - Pregnancy Care Schedule",
+  "events": [
+    {
+      "key": "anc_1",
+      "name": "ANC 1 - First Antenatal Checkup",
+      "category": "checkup",
+      "dose": 1,
+      "weeks_from_lmp": 4,
+      "window_start_days": 0,
+      "window_end_days": 14,
+      "description": "First antenatal visit. Confirm pregnancy, check weight, blood pressure, and hemoglobin.",
+      "why_it_matters": "Early antenatal care is crucial for detecting and managing risks early.",
+      "what_to_expect": "Doctor will confirm pregnancy, do basic tests, and give folic acid supplements."
+    },
+    {
+      "key": "anc_2",
+      "name": "ANC 2 - Second Antenatal Checkup",
+      "category": "checkup",
+      "dose": 2,
+      "weeks_from_lmp": 8,
+      "window_start_days": 14,
+      "window_end_days": 35,
+      "description": "Second antenatal visit. Check fetal heartbeat and mother's health.",
+      "why_it_matters": "Monitoring fetal development and mother's health regularly.",
+      "what_to_expect": "Ultrasound may be done, blood tests for anemia and sugar."
+    },
+    {
+      "key": "anc_3",
+      "name": "ANC 3 - Third Antenatal Checkup",
+      "category": "checkup",
+      "dose": 3,
+      "weeks_from_lmp": 12,
+      "window_start_days": 56,
+      "window_end_days": 77,
+      "description": "Third antenatal visit. Continue monitoring.",
+      "why_it_matters": "Regular monitoring prevents complications.",
+      "what_to_expect": "Check weight, BP, fetal growth. TT vaccination may be given."
+    },
+    {
+      "key": "anc_4",
+      "name": "ANC 4 - Fourth Antenatal Checkup",
+      "category": "checkup",
+      "dose": 4,
+      "weeks_from_lmp": 20,
+      "window_start_days": 98,
+      "window_end_days": 140,
+      "description": "Fourth antenatal visit. Anomaly scan usually done.",
+      "why_it_matters": "Anomaly scan checks baby's structure and growth.",
+      "what_to_expect": "Detailed ultrasound to check baby's organs and growth."
+    },
+    {
+      "key": "anc_5",
+      "name": "ANC 5 - Fifth Antenatal Checkup",
+      "category": "checkup",
+      "dose": 5,
+      "weeks_from_lmp": 24,
+      "window_start_days": 140,
+      "window_end_days": 182,
+      "description": "Fifth antenatal visit. Monitor for gestational diabetes.",
+      "why_it_matters": "Gestational diabetes can affect both mother and baby.",
+      "what_to_expect": "Blood sugar test, blood pressure monitoring."
+    },
+    {
+      "key": "anc_6",
+      "name": "ANC 6 - Sixth Antenatal Checkup",
+      "category": "checkup",
+      "dose": 6,
+      "weeks_from_lmp": 28,
+      "window_start_days": 182,
+      "window_end_days": 210,
+      "description": "Sixth antenatal visit. Final checkups before delivery.",
+      "why_it_matters": "Preparing for safe delivery.",
+      "what_to_expect": "Check baby's position, plan for delivery place."
+    },
+    {
+      "key": "anc_7",
+      "name": "ANC 7 - Seventh Antenatal Checkup",
+      "category": "checkup",
+      "dose": 7,
+      "weeks_from_lmp": 32,
+      "window_start_days": 210,
+      "window_end_days": 238,
+      "description": "Seventh antenatal visit. Final preparations.",
+      "why_it_matters": "Ensuring mother is ready for delivery.",
+      "what_to_expect": "Final ultrasound, blood tests, discussion on labor signs."
+    },
+    {
+      "key": "anc_8",
+      "name": "ANC 8 - Eighth Antenatal Checkup",
+      "category": "checkup",
+      "dose": 8,
+      "weeks_from_lmp": 36,
+      "window_start_days": 238,
+      "window_end_days": 259,
+      "description": "Weekly visits until delivery. Checking for labor signs.",
+      "why_it_matters": "Weekly monitoring in final month is critical.",
+      "what_to_expect": "Weekly checkups, monitoring labor signs."
+    },
+    {
+      "key": "tt_1",
+      "name": "Tetanus Toxoid (TT) - 1st dose",
+      "category": "vaccination",
+      "dose": 1,
+      "weeks_from_lmp": 12,
+      "window_start_days": 56,
+      "window_end_days": 98,
+      "description": "First TT vaccine during pregnancy.",
+      "why_it_matters": "Protects mother and newborn against tetanus.",
+      "what_to_expect": "Injection in arm. Mild soreness possible."
+    },
+    {
+      "key": "tt_2",
+      "name": "Tetanus Toxoid (TT) - 2nd dose",
+      "category": "vaccination",
+      "dose": 2,
+      "weeks_from_lmp": 16,
+      "window_start_days": 98,
+      "window_end_days": 140,
+      "description": "Second TT vaccine, 4 weeks after first.",
+      "why_it_matters": "Completes tetanus protection for delivery.",
+      "what_to_expect": "Injection. Mild soreness possible."
+    },
+    {
+      "key": "ifa",
+      "name": "IFA Tablets - Iron & Folic Acid",
+      "category": "supplement",
+      "dose": 1,
+      "weeks_from_lmp": 4,
+      "window_start_days": 0,
+      "window_end_days": 259,
+      "description": "Daily iron and folic acid supplementation throughout pregnancy.",
+      "why_it_matters": "Prevents anemia, supports baby's growth and brain development.",
+      "what_to_expect": "Take one tablet daily. May cause constipation - eat fiber."
+    },
+    {
+      "key": "calcium",
+      "name": "Calcium Supplements",
+      "category": "supplement",
+      "dose": 1,
+      "weeks_from_lmp": 20,
+      "window_start_days": 98,
+      "window_end_days": 259,
+      "description": "Calcium supplementation from 20 weeks.",
+      "why_it_matters": "Supports baby's bone development and prevents preeclampsia.",
+      "what_to_expect": "Take one tablet daily with food."
+    }
+  ]
+}

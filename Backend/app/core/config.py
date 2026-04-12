@@ -50,6 +50,17 @@ class Settings(BaseSettings):
     def is_prod(self) -> bool:
         return self.app_env == "production"
 
+    # Twilio for WhatsApp/SMS notifications
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_phone_number: str = ""
+    notification_phone: str = ""
+
+    # Vapi for IVR calls
+    vapi_api_key: str = ""
+    vapi_assistant_id: str = ""
+    vapi_phone_number_id: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:
