@@ -271,15 +271,15 @@ async def vapi_webhook(
                         "role": "system",
                         "content": (
                             f"You are the WellSync health assistant for the {household_name} family. "
-                            f"Your household ID is: {h_id}. "
+                            f"Your household ID is: {{household_id}}. "
                             f"STRICT RULE: The user prefers {target_lang_name}. You MUST respond ONLY in {target_lang_name}. "
                             f"DYNAMIC CONTEXT: This household has children: {child_context_str}. "
                             "RULES FOR ANSWERING:\n"
-                            "1. If the user asks about their child generally, and they only have ONE child in the DYNAMIC CONTEXT, immediately use that child's ID to check records without asking.\n"
-                            "2. If they have MULTIPLE children and don't specify, politely ask them which child they mean.\n"
-                            "3. If they ask about a specific name (e.g., 'Saanvi'), verify it against the DYNAMIC CONTEXT. If the name is NOT there, politely reply: 'You do not have a child named [Name] registered.' and list their actual children.\n"
-                            "CRITICAL: You DO have access to their health records. Use tools (like `answer_health_question`, `get_household_dependents`, `get_timeline_summary`, `get_next_vaccine`) to retrieve real data whenever appropriate.\n"
-                            "IMPORTANT: When calling any tool that requires household_id, ALWAYS use the value: {h_id}\n"
+                            "1. FIRST: Call `get_household_dependents` to get the list of children with their IDs.\n"
+                            "2. If the user asks about their child and they only have ONE child, use that child's ID.\n"
+                            "3. If they have MULTIPLE children and don't specify, politely ask which child they mean.\n"
+                            "4. If they ask about a specific name (e.g., 'Saanvi'), use the ID returned by `get_household_dependents`.\n"
+                            "CRITICAL: You DO have access to their health records. Use tools to retrieve real data.\n"
                             "\n\nGoals:\n"
                             "- Discuss exact vaccination status by querying tools with the correct dependent ID.\n"
                             "- Provide clear, simple health education.\n"
@@ -306,20 +306,17 @@ async def vapi_webhook(
                                     "household_id": {
                                         "type": "string",
                                         "description": "The ID of the family household.",
-                                        "default": h_id,
                                     },
                                     "dependent_id": {
                                         "type": "string",
                                         "description": "OPTIONAL: The specific child's ID. Leave empty if asking about the whole family or if child is unnamed.",
-                                        "default": "",
                                     },
                                     "language": {
                                         "type": "string",
                                         "description": "The language code to use for the response (e.g. 'hi', 'en').",
-                                        "default": lang,
                                     },
                                 },
-                                "required": ["question"],
+                                "required": ["question", "household_id"],
                             },
                         },
                     },
@@ -334,33 +331,9 @@ async def vapi_webhook(
                                     "household_id": {
                                         "type": "string",
                                         "description": "The ID of the family household.",
-                                        "default": h_id,
                                     }
                                 },
-                                "required": [],
-                            },
-                        },
-                    },
-                    {
-                        "type": "function",
-                        "function": {
-                            "name": "get_child_vaccination_status",
-                            "description": "Get the vaccination status for a specific child.",
-                            "parameters": {
-                                "type": "object",
-                                "properties": {
-                                    "household_id": {
-                                        "type": "string",
-                                        "description": "The ID of the family household.",
-                                        "default": h_id,
-                                    },
-                                    "dependent_id": {
-                                        "type": "string",
-                                        "description": "The specific child's ID from the household.",
-                                        "default": "",
-                                    },
-                                },
-                                "required": [],
+                                "required": ["household_id"],
                             },
                         },
                     },
@@ -374,11 +347,10 @@ async def vapi_webhook(
                                 "properties": {
                                     "dependent_id": {
                                         "type": "string",
-                                        "description": "The specific child's ID from the DYNAMIC CONTEXT.",
-                                        "default": "",
+                                        "description": "The specific child's ID from the household.",
                                     }
                                 },
-                                "required": [],
+                                "required": ["dependent_id"],
                             },
                         },
                     },
@@ -392,15 +364,19 @@ async def vapi_webhook(
                                 "properties": {
                                     "dependent_id": {
                                         "type": "string",
-                                        "description": "The specific child's ID from the DYNAMIC CONTEXT.",
-                                        "default": "",
+                                        "description": "The specific child's ID from the household.",
                                     }
                                 },
-                                "required": [],
+                                "required": ["dependent_id"],
                             },
                         },
                     },
                 ],
+            },
+            "assistantOverrides": {
+                "variableValues": {
+                    "household_id": h_id,
+                }
             },
         }
 
@@ -609,9 +585,9 @@ async def _get_dependents_for_household(household_id: str, session) -> str:
     dependents = result.scalars().all()
 
     if not dependents:
-        return "No children found in this household."
+        return '{"dependents": [], "message": "No children found in this household."}'
 
-    lines = ["Children in this family:"]
+    children = []
     today = date.today()
     for d in dependents:
         age_days = (today - d.date_of_birth).days
@@ -622,9 +598,18 @@ async def _get_dependents_for_household(household_id: str, session) -> str:
         else:
             years = age_days // 365
             age_str = f"{years} years"
-        lines.append(f"  - Name: {d.name}, Age: {age_str}, ID: {d.id}")
+        children.append(
+            {
+                "name": d.name,
+                "date_of_birth": str(d.date_of_birth),
+                "age": age_str,
+                "dependent_id": d.id,
+            }
+        )
 
-    return "\n".join(lines)
+    import json
+
+    return json.dumps({"dependents": children})
 
 
 async def _get_timeline_summary(dependent_id: str, session) -> str:
