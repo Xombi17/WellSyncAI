@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    config,
     ai,
     auth,
     dependents,
@@ -34,6 +35,7 @@ router.include_router(medicines.router)
 router.include_router(growth.router)
 router.include_router(ai.router)
 router.include_router(voice.router)
+router.include_router(config.router)
 router.include_router(sync.router)
 router.include_router(health_tips.router)
 router.include_router(notifications.router)
