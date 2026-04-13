@@ -95,3 +95,10 @@ Backend/tests/*
 .kiro/skills/*
 .qoder/skills/*
 .claude/skills/*
+New-frontend/*
+
+Frontend/playwright-report/*
+Frontend/test-results/*
+
+Android/*
+/Android/

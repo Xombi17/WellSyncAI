@@ -1,173 +1,149 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Home, Camera, User, Activity, Bell, Search, Mic, Sparkles, Settings, Clock, LogOut, MapPin, Users } from 'lucide-react';
-import { VoiceFAB } from './VoiceFAB';
+
+import { useState } from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { ThemeToggle } from './ThemeToggle';
-import { useAuthGuard, useLogout } from '@/hooks/use-auth';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '@/lib/auth-store';
+import { useHousehold } from '@/lib/hooks';
+import { VoiceFAB } from '@/components/VoiceFAB';
+import {
+  LayoutDashboard,
+  CalendarClock,
+  Pill,
+  Baby,
+  Heart,
+  MapPin,
+  Users,
+  Bell,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+} from 'lucide-react';
 
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
+var navItems = [
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/timeline', label: 'Health Timeline', icon: CalendarClock },
+  { path: '/medicines', label: 'Medicines', icon: Pill },
+  { path: '/pregnancy', label: 'Pregnancy Care', icon: Heart },
+  { path: '/growth', label: 'Growth Tracking', icon: Baby },
+  { path: '/care', label: 'Nearby Care', icon: MapPin },
+  { path: '/dependents', label: 'Family Members', icon: Users },
+  { path: '/reminders', label: 'Reminders', icon: Bell },
+  { path: '/settings', label: 'Settings', icon: Settings },
+];
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getHousehold, type Household } from '@/lib/api';
+export function AppLayout({ children }: { children: ReactNode }) {
+  var { logout } = useAuthStore();
+  var { data: household } = useHousehold();
+  var pathname = usePathname();
+  var router = useRouter();
+  var [mobileNav, setMobileNav] = useState(false);
 
-export function AppLayout({ children }: AppLayoutProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const { isLoading: isAuthLoading, isAuthed } = useAuthGuard();
-  const { logout } = useLogout();
-
-  const householdId = typeof window !== 'undefined' ? localStorage.getItem('household_id') : null;
-
-  const { data: household, isLoading: isHouseholdLoading } = useQuery({
-    queryKey: ['household', householdId],
-    queryFn: () => householdId ? getHousehold(householdId) : Promise.reject('No ID'),
-    enabled: !!householdId && isAuthed,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const handleSignOut = () => {
+  var handleLogout = () => {
     logout();
-  };
-
-  const showOnboarding = false;
-
-  const handleOnboardingComplete = () => {
-    queryClient.invalidateQueries({ queryKey: ['household', householdId] });
-  };
-
-  const isActive = (path: string) => {
-    if (path === '/dashboard' && pathname === '/dashboard') return true;
-    if (path !== '/dashboard' && pathname?.startsWith(path)) return true;
-    return false;
+    router.push('/');
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f6fd] dark:bg-slate-900 flex font-sans text-slate-800 dark:text-slate-100 selection:bg-blue-200 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100 overflow-hidden relative transition-colors duration-300">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-72 flex-col bg-[#f3f6fd] dark:bg-slate-900 border-r border-white/50 dark:border-slate-800/50 px-6 py-8 z-20 relative shadow-[10px_0_20px_rgba(0,0,0,0.02)] dark:shadow-[10px_0_20px_rgba(0,0,0,0.4)] transition-colors duration-300">
-        <Link href="/" className="flex items-center gap-3 mb-12 hover:opacity-80 transition-opacity">
-          <div className="w-12 h-12 bg-blue-400 rounded-[1.25rem] flex items-center justify-center shadow-[4px_4px_10px_rgba(96,165,250,0.4),inset_2px_2px_6px_rgba(255,255,255,0.6),inset_-2px_-2px_6px_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_10px_rgba(96,165,250,0.2),inset_2px_2px_6px_rgba(255,255,255,0.2),inset_-2px_-2px_6px_rgba(0,0,0,0.4)]">
-            <Activity className="text-white" size={24} strokeWidth={3} />
-          </div>
-          <span className="text-2xl font-black tracking-tight text-slate-800 dark:text-white">WellSync</span>
-        </Link>
+    <div className="min-h-screen bg-surface-950 flex">
+      <aside className="hidden lg:flex flex-col w-64 bg-surface-900/80 border-r border-white/[0.06] fixed inset-y-0 left-0 z-30">
+        <div className="p-5 border-b border-white/[0.06]">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <img src="/images/logo-icon.png" alt="" className="w-8 h-8 rounded-lg" />
+            <span className="font-heading font-800 text-lg text-white">
+              Well<span className="text-teal-400">Sync</span>
+              <span className="text-teal-300 text-xs font-600 ml-0.5">AI</span>
+            </span>
+          </Link>
+        </div>
 
-        <nav className="flex-1 space-y-3 overflow-y-auto pb-4">
-          <NavItem href="/dashboard" icon={Home} label="Dashboard" active={isActive('/dashboard')} />
-          <NavItem href="/care" icon={MapPin} label="Nearby Care" active={isActive('/care')} />
-          <NavItem href="/dependents" icon={User} label="Dependents" active={isActive('/dependents')} />
-          <NavItem href="/medicine" icon={Camera} label="Medicine Scanner" active={isActive('/medicine')} />
-          <NavItem href="/reminders" icon={Clock} label="Reminders" active={isActive('/reminders')} />
-          <NavItem href="/settings" icon={Settings} label="Settings" active={isActive('/settings')} />
-          
-          <button 
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all mt-auto"
-          >
-            <LogOut size={24} strokeWidth={2.5} />
-            Sign Out
-          </button>
+        <div className="p-3 mx-3 mt-3 bg-surface-800/60 rounded-xl border border-white/[0.04]">
+          <p className="text-xs text-white/30 mb-1">Family</p>
+          <p className="text-sm font-heading font-700 text-white">{household?.family_name || household?.name || '...'} Family</p>
+          <p className="text-xs text-teal-400">{household?.language || household?.primary_language || ''}</p>
+        </div>
+
+        <nav className="flex-1 p-3 mt-2 space-y-0.5 overflow-y-auto">
+          {navItems.map((item) => {
+            var active = pathname?.startsWith(item.path) || false;
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  active
+                    ? 'bg-teal-500/15 text-teal-400 border border-teal-500/20'
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04] border border-transparent'
+                }`}
+              >
+                <item.icon size={18} />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="mt-auto pt-4 bg-blue-400 dark:bg-blue-500 rounded-[2rem] p-6 text-center shadow-[10px_10px_20px_rgba(96,165,250,0.2),inset_4px_4px_10px_rgba(255,255,255,0.4),inset_-4px_-4px_10px_rgba(0,0,0,0.1)] dark:shadow-[10px_10px_20px_rgba(0,0,0,0.4),inset_4px_4px_10px_rgba(255,255,255,0.2),inset_-4px_-4px_10px_rgba(0,0,0,0.3)] relative overflow-hidden group shrink-0">
-          <div className="relative z-10">
-            <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[4px_4px_10px_rgba(0,0,0,0.1),inset_2px_2px_6px_rgba(255,255,255,0.9),inset_-2px_-2px_6px_rgba(0,0,0,0.05)] dark:shadow-[4px_4px_10px_rgba(0,0,0,0.3),inset_2px_2px_6px_rgba(255,255,255,0.1),inset_-2px_-2px_6px_rgba(0,0,0,0.4)]">
-              <Mic className="text-blue-500 dark:text-blue-400" size={24} strokeWidth={3} />
-            </div>
-            <h4 className="font-black text-white mb-2 flex justify-center items-center gap-1"><Sparkles size={16} className="text-blue-100 dark:text-blue-200"/> Voice Assistant</h4>
-            <p className="text-sm font-medium text-blue-100 dark:text-blue-200 mb-2">Tap the mic to log medicine or ask health questions.</p>
-          </div>
+        <div className="p-3 border-t border-white/[0.06]">
+          <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/30 hover:text-coral-400 hover:bg-coral-500/10 w-full transition-all">
+            <LogOut size={18} />
+            Sign Out
+          </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        {/* Top Header */}
-        <header className="bg-[#f3f6fd]/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/50 dark:border-slate-800/50 px-6 py-4 flex items-center justify-between sticky top-0 z-30 transition-colors duration-300">
-          <div className="flex items-center gap-3 md:hidden">
-            <div className="w-10 h-10 bg-blue-400 rounded-xl flex items-center justify-center shadow-[4px_4px_10px_rgba(96,165,250,0.4),inset_2px_2px_6px_rgba(255,255,255,0.6),inset_-2px_-2px_6px_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_10px_rgba(96,165,250,0.2),inset_2px_2px_6px_rgba(255,255,255,0.2),inset_-2px_-2px_6px_rgba(0,0,0,0.4)]">
-              <Activity className="text-white" size={20} strokeWidth={3} />
-            </div>
-            <span className="text-xl font-black text-slate-800 dark:text-white">WellSync</span>
-          </div>
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-surface-950/90 backdrop-blur-xl border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-4 h-14">
+          <button onClick={() => setMobileNav(true)} className="p-2 text-white/60">
+            <Menu size={20} />
+          </button>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <img src="/images/logo-icon.png" alt="" className="w-7 h-7 rounded-lg" />
+            <span className="font-heading font-700 text-sm text-white">Well<span className="text-teal-400">Sync</span></span>
+          </Link>
+          <div className="w-9" />
+        </div>
+      </div>
 
-          <div className="hidden md:flex items-center bg-white dark:bg-slate-800 rounded-2xl px-5 py-3 w-96 shadow-[inset_2px_2px_6px_rgba(0,0,0,0.05),inset_-2px_-2px_6px_rgba(255,255,255,0.8)] dark:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.4),inset_-2px_-2px_6px_rgba(255,255,255,0.05)] focus-within:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.9)] dark:focus-within:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.1)] transition-all">
-            <Search className="text-slate-400 dark:text-slate-500 mr-3" size={20} strokeWidth={2.5} />
-            <input type="text" placeholder="Search medicines, events..." className="bg-transparent border-none outline-none w-full text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-bold" />
-          </div>
+      <AnimatePresence>
+        {mobileNav && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 z-50 lg:hidden" onClick={() => setMobileNav(false)} />
+            <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 left-0 w-72 bg-surface-900 z-50 lg:hidden border-r border-white/[0.06] flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
+                <span className="font-heading font-700 text-white">Well<span className="text-teal-400">Sync</span> AI</span>
+                <button onClick={() => setMobileNav(false)} className="p-1 text-white/40"><X size={20} /></button>
+              </div>
+              <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+                {navItems.map((item) => {
+                  var active = pathname?.startsWith(item.path) || false;
+                  return (
+                    <Link key={item.path} href={item.path} onClick={() => setMobileNav(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${active ? 'bg-teal-500/15 text-teal-400' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'}`}>
+                      <item.icon size={18} />{item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="p-3 border-t border-white/[0.06]">
+                <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/30 hover:text-coral-400 w-full">
+                  <LogOut size={18} />Sign Out
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
-          <div className="flex items-center gap-5">
-            <ThemeToggle />
-            <Link href="/reminders" className="w-12 h-12 rounded-[1.25rem] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors relative shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_6px_rgba(255,255,255,0.9),inset_-2px_-2px_6px_rgba(0,0,0,0.02)] dark:shadow-[4px_4px_10px_rgba(0,0,0,0.3),inset_2px_2px_6px_rgba(255,255,255,0.1),inset_-2px_-2px_6px_rgba(0,0,0,0.4)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.05)] dark:active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)]">
-              <Bell size={22} strokeWidth={2.5} />
-              <span className="absolute top-3 right-3 w-3 h-3 bg-red-400 rounded-full border-2 border-white shadow-[0_0_10px_rgba(248,113,113,0.5)]"></span>
-            </Link>
-            <Link href="/settings" className="w-12 h-12 rounded-[1.25rem] bg-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_6px_rgba(255,255,255,0.9),inset_-2px_-2px_6px_rgba(0,0,0,0.02)] p-1 overflow-hidden block relative">
-              <Image 
-                src="https://picsum.photos/seed/family/100/100" 
-                alt="Profile" 
-                fill
-                className="object-cover rounded-xl" 
-              />
-            </Link>
-          </div>
-        </header>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-8">
-          <div className="max-w-6xl mx-auto h-full">
-            {children}
-          </div>
+      <main className="flex-1 lg:ml-64 min-h-screen">
+        <div className="pt-16 lg:pt-0">
+          {children}
         </div>
       </main>
 
-      {/* Mobile Bottom Nav */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-2xl border-t border-slate-100 px-6 py-4 flex justify-between items-center z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)] rounded-t-[2rem]">
-        <MobileNavItem href="/dashboard" icon={Home} label="Home" active={isActive('/dashboard')} />
-        <MobileNavItem href="/care" icon={MapPin} label="Care" active={isActive('/care')} />
-        <MobileNavItem href="/dependents" icon={User} label="Family" active={isActive('/dependents')} />
-        <MobileNavItem href="/medicine" icon={Camera} label="Scan" active={isActive('/medicine')} />
-        <MobileNavItem href="/reminders" icon={Clock} label="Stats" active={isActive('/reminders')} />
-      </div>
-
-      {/* Shared Voice FAB */}
       <VoiceFAB />
     </div>
-  );
-}
-
-function NavItem({ href, icon: Icon, label, active }: any) {
-  return (
-    <Link
-      href={href}
-      className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black transition-all ${
-        active 
-          ? 'bg-white text-blue-500 shadow-[6px_6px_12px_rgba(0,0,0,0.05),inset_2px_2px_6px_rgba(255,255,255,0.9),inset_-2px_-2px_6px_rgba(0,0,0,0.02)]' 
-          : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
-      }`}
-    >
-      <Icon size={24} strokeWidth={active ? 3 : 2.5} />
-      {label}
-    </Link>
-  );
-}
-
-function MobileNavItem({ href, icon: Icon, label, active }: any) {
-  return (
-    <Link
-      href={href}
-      className={`flex flex-col items-center p-2 transition-colors ${active ? 'text-blue-500' : 'text-slate-400 hover:text-slate-600'}`}
-    >
-      <div className={`p-2 rounded-xl mb-1 ${active ? 'bg-blue-50 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]' : ''}`}>
-        <Icon size={24} strokeWidth={active ? 3 : 2.5} />
-      </div>
-      <span className="text-[11px] font-black">{label}</span>
-    </Link>
   );
 }

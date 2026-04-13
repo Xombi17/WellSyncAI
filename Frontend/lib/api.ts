@@ -381,3 +381,48 @@ export async function createGrowthRecord(dependentId: string, data: {
 export async function getGrowthRecords(dependentId: string): Promise<GrowthRecord[]> {
   return fetchApi<GrowthRecord[]>(`/api/v1/growth/${dependentId}`);
 }
+
+export const authApi = {
+  async login(username: string, password: string): Promise<{ access_token: string; token_type: string; household_id: string }> {
+    const response = await fetch(`${API_URL}/api/v1/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ username, password }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new ApiError(response.status, errorText || 'Login failed');
+    }
+
+    return response.json();
+  },
+
+  async signup(payload: {
+    name: string;
+    username: string;
+    password: string;
+    primary_language?: string;
+  }): Promise<Household> {
+    return fetchApi<Household>('/api/v1/households', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: payload.name,
+        username: payload.username,
+        password: payload.password,
+        primary_language: payload.primary_language ?? 'en',
+      }),
+    });
+  },
+};
+
+export function toLanguageCode(language: string): string {
+  const normalized = language.trim().toLowerCase();
+  if (normalized === 'hindi') return 'hi';
+  if (normalized === 'marathi') return 'mr';
+  if (normalized === 'gujarati') return 'gu';
+  if (normalized === 'bengali') return 'bn';
+  if (normalized === 'tamil') return 'ta';
+  if (normalized === 'telugu') return 'te';
+  return 'en';
+}

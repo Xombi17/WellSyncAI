@@ -3,20 +3,7 @@ import './globals.css'; // Global styles
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Providers } from '@/components/Providers';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
-import { Lora, Raleway } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
-
-const lora = Lora({ 
-  subsets: ['latin'], 
-  variable: '--font-lora',
-  display: 'swap',
-});
-
-const raleway = Raleway({ 
-  subsets: ['latin'], 
-  variable: '--font-raleway',
-  display: 'swap',
-});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -26,12 +13,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'WellSync AI',
-  description: 'Voice-First Health Memory System',
+  title: 'WellSync AI — Voice-First Health Memory for Every Family',
+  description: 'Voice-first preventive healthcare assistant for families. Remember vaccinations, checkups, and health milestones.',
   icons: {
     icon: [
       { url: '/favicon.ico' },
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
@@ -41,11 +29,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${lora.variable} ${raleway.variable}`}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className="font-raleway transition-colors duration-300" suppressHydrationWarning>
+      <body className="transition-colors duration-300" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Providers>
             <ServiceWorkerRegistration />

@@ -30,6 +30,7 @@ class Household(SQLModel, table=True):
     __tablename__ = "households"
 
     id: str = Field(
+        default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
         index=True,
         description="Household / Profile ID (Matches Supabase Auth User ID)"

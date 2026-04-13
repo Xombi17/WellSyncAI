@@ -1,10 +1,18 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import delete
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
+from app.models.conversation import Conversation, HealthNote
+from app.models.dependent import Dependent
+from app.models.growth_record import GrowthRecord
+from app.models.health_event import HealthEvent
+from app.models.medicine_regimen import MedicineRegimen
+from app.models.pregnancy import PregnancyProfile
+from app.models.reminder import Reminder
 from app.models.household import Household
 from app.schemas.household import HouseholdCreate, HouseholdResponse, HouseholdUpdate
 from app.services.scheme_service import get_eligible_schemes, HealthScheme
@@ -13,12 +21,19 @@ from app.core.auth import get_current_household, get_password_hash
 router = APIRouter(prefix="/households", tags=["Households"])
 
 
+def _normalize_username(username: str) -> str:
+    normalized = username.strip()
+    if "@" in normalized:
+        normalized = normalized.lower()
+    return normalized
+
+
 @router.post("", response_model=HouseholdResponse, status_code=status.HTTP_201_CREATED)
 async def create_household(
     body: HouseholdCreate,
     session: AsyncSession = Depends(get_session),
 ) -> Household:
-    username = body.username
+    username = _normalize_username(body.username)
     password = body.password
 
     body_data = body.model_dump(exclude_unset=True)
@@ -27,6 +42,7 @@ async def create_household(
         result = await session.execute(select(Household).where(Household.username == username))
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Username already exists")
+        body_data["username"] = username
         body_data["password_hash"] = get_password_hash(password)
     elif username or password:
         raise HTTPException(status_code=400, detail="Both username and password required")
@@ -94,11 +110,27 @@ async def update_household(
 async def delete_household(
     household_id: str,
     session: AsyncSession = Depends(get_session),
+    current_household: Household = Depends(get_current_household),
 ) -> None:
+    if current_household.id != household_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
     household = await session.get(Household, household_id)
     if not household:
         raise HTTPException(status_code=404, detail="Household not found")
+
+    # Remove dependent records first so foreign key constraints do not block deletion.
+    await session.execute(delete(Reminder).where(Reminder.household_id == household_id))
+    await session.execute(delete(HealthEvent).where(HealthEvent.household_id == household_id))
+    await session.execute(delete(GrowthRecord).where(GrowthRecord.household_id == household_id))
+    await session.execute(delete(MedicineRegimen).where(MedicineRegimen.household_id == household_id))
+    await session.execute(delete(PregnancyProfile).where(PregnancyProfile.household_id == household_id))
+    await session.execute(delete(Conversation).where(Conversation.household_id == household_id))
+    await session.execute(delete(HealthNote).where(HealthNote.household_id == household_id))
+    await session.execute(delete(Dependent).where(Dependent.household_id == household_id))
+
     await session.delete(household)
+    await session.commit()
 
 
 @router.get("/asha/assigned", response_model=list[HouseholdResponse])

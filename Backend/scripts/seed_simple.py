@@ -13,6 +13,7 @@ from sqlmodel import select
 # Import models
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from app.core.auth import get_password_hash
 from app.models.household import Household
 from app.models.dependent import Dependent
 from app.models.health_event import HealthEvent, EventStatus
@@ -114,7 +115,7 @@ async def create_demo_users():
                 household = Household(
                     name=family["name"],
                     username=family["username"],
-                    password_hash=family["password"],
+                    password_hash=get_password_hash(family["password"]),
                     primary_language="hi",
                     auth_id=user_id,
                 )

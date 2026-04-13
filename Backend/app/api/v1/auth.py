@@ -12,6 +12,14 @@ router = APIRouter(tags=["Authentication"])
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.auth import create_access_token, verify_password
 
+
+def _normalize_username(username: str) -> str:
+    normalized = username.strip()
+    # Treat email-style usernames case-insensitively.
+    if "@" in normalized:
+        normalized = normalized.lower()
+    return normalized
+
 @router.post("/login")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -21,12 +29,20 @@ async def login(
     Standard OAuth2 compatible token login.
     Used by the demo login system and manual logins.
     """
-    stmt = select(Household).where(Household.username == form_data.username)
+    normalized_username = _normalize_username(form_data.username)
+    stmt = select(Household).where(Household.username == normalized_username)
     result = await session.execute(stmt)
     household = result.scalar_one_or_none()
 
-    if not household or not verify_password(form_data.password, household.password_hash):
-        log.warning("login_failed", username=form_data.username)
+    password_ok = False
+    if household and household.password_hash:
+        try:
+            password_ok = verify_password(form_data.password, household.password_hash)
+        except Exception:
+            password_ok = False
+
+    if not household or not password_ok:
+        log.warning("login_failed", username=normalized_username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

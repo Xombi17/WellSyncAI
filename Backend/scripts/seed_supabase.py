@@ -15,6 +15,7 @@ from sqlmodel import select
 # Import models
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from app.core.auth import get_password_hash
 from app.models.household import Household
 from app.models.dependent import Dependent
 from app.models.health_event import HealthEvent, EventStatus, VerificationStatus
@@ -97,6 +98,7 @@ async def create_demo_users():
                     username=family["username"],
                     primary_language="hi",
                     auth_user_id=user_id,
+                    password_hash=get_password_hash(family["password"]),
                 )
                 session.add(household)
                 await session.commit()

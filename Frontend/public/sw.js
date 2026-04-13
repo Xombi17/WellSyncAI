@@ -1,10 +1,8 @@
-const CACHE_NAME = 'wellsync-v1';
-const STATIC_CACHE = 'wellsync-static-v1';
-const DYNAMIC_CACHE = 'wellsync-dynamic-v1';
+const CACHE_NAME = 'wellsync-v2';
+const STATIC_CACHE = 'wellsync-static-v2';
+const DYNAMIC_CACHE = 'wellsync-dynamic-v2';
 
 const STATIC_ASSETS = [
-  '/',
-  '/dashboard',
   '/manifest.json',
   '/web-app-manifest-192x192.png',
   '/web-app-manifest-512x512.png',
@@ -49,6 +47,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (request.method !== 'GET') return;
+
+  // Never cache Next.js internal assets/chunks. Stale chunk/runtime pairs can break boot.
+  if (url.pathname.startsWith('/_next/')) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Keep HTML navigations fresh to avoid old markup referencing new chunk hashes.
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
 
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(request));

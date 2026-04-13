@@ -1,51 +1,108 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
 
 @theme {
-  --color-primary: #2563EB;
-  --color-secondary: #60A5FA;
-  --color-cta: #059669;
+  --color-teal-50: #effefb;
+  --color-teal-100: #c8fff4;
+  --color-teal-200: #91ffea;
+  --color-teal-300: #52f5dc;
+  --color-teal-400: #20dfc8;
+  --color-teal-500: #07c3af;
+  --color-teal-600: #029d8f;
+  --color-teal-700: #067d73;
+  --color-teal-800: #0a635d;
+  --color-teal-900: #0d524d;
 
-  --color-text-primary-light: #1E293B;
-  --color-bg-primary-light: #F8FAFC;
+  --color-sage-50: #f4f7f4;
+  --color-sage-100: #e5ebe4;
+  --color-sage-200: #ccd8ca;
+  --color-sage-300: #a5bba2;
+  --color-sage-400: #7a9a76;
+  --color-sage-500: #587d54;
+  --color-sage-600: #446440;
+  --color-sage-700: #375035;
+  --color-sage-800: #2e412d;
+  --color-sage-900: #263626;
 
-  --color-text-primary-dark: #F8FAFC;
-  --color-bg-primary-dark: #0F172A;
-  
-  --font-lora: "Lora", var(--font-lora), serif;
-  --font-raleway: "Raleway", var(--font-raleway), sans-serif;
+  --color-warm-50: #fefdf8;
+  --color-warm-100: #fdf9e8;
+  --color-warm-200: #fbf0c5;
+  --color-warm-300: #f8e39a;
+  --color-warm-400: #f3ce5d;
+  --color-warm-500: #ecb833;
+  --color-warm-600: #d99b1e;
+  --color-warm-700: #b47618;
+  --color-warm-800: #925d1b;
+  --color-warm-900: #784d1c;
+
+  --color-coral-50: #fff5f3;
+  --color-coral-100: #ffe8e3;
+  --color-coral-200: #ffd5cc;
+  --color-coral-300: #ffb5a6;
+  --color-coral-400: #ff8a71;
+  --color-coral-500: #f86545;
+  --color-coral-600: #e54a27;
+  --color-coral-700: #c13a1c;
+  --color-coral-800: #a0331c;
+  --color-coral-900: #84301e;
+
+  --color-navy-50: #f0f4fa;
+  --color-navy-100: #dde6f3;
+  --color-navy-200: #c2d2ea;
+  --color-navy-300: #99b5dc;
+  --color-navy-400: #6990c9;
+  --color-navy-500: #4773b8;
+  --color-navy-600: #365b9b;
+  --color-navy-700: #2d497e;
+  --color-navy-800: #293f69;
+  --color-navy-900: #1a2744;
+
+  --color-surface-950: #0a0f1a;
+  --color-surface-900: #0d1424;
+  --color-surface-850: #111a2e;
+  --color-surface-800: #151f35;
+  --color-surface-700: #1c2a45;
+  --color-surface-600: #243455;
+  --color-surface-500: #2e4068;
+
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-@layer base {
-  html {
-    @apply scroll-smooth;
-  }
-  
-  body {
-    @apply text-base antialiased;
-    color: var(--color-text-primary-light);
-    background-color: var(--color-bg-primary-light);
-  }
-
-  .dark body {
-    color: var(--color-text-primary-dark);
-    background-color: var(--color-bg-primary-dark);
-  }
-
-  /* Accessible focus states globally (3px rings) */
-  :focus-visible {
-    @apply outline-hidden ring-3 ring-secondary ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
-  }
-
-  /* Support reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    ::before,
-    ::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-body);
 }
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background-color: #0a0f1a;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  80%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #20dfc8 0%, #52f5dc 40%, #6990c9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d1424; }
+::-webkit-scrollbar-thumb { background: #1c2a45; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2e4068; }

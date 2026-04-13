@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import httpx
+import structlog
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -14,12 +15,20 @@ from app.core.database import get_session
 from app.models.household import Household
 
 settings = get_settings()
+log = structlog.get_logger()
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        if pwd_context.identify(hashed_password):
+            return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        pass
+
+    # Legacy seed data stored raw demo passwords in password_hash.
+    return plain_password == hashed_password
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)

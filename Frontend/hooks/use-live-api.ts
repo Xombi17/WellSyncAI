@@ -9,6 +9,9 @@ import {
   HealthPassResponse
 } from '@/lib/api';
 
+const MAX_SESSION_DURATION = 15 * 60 * 1000; // 15 minutes
+const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+
 const getHouseholdDependentsDeclaration: FunctionDeclaration = {
   name: 'get_household_dependents',
   description: 'Fetches the list of all children/dependents linked to the user\'s household. Use this to identify which child the user is referring to.',
@@ -62,9 +65,6 @@ export function useLiveAPI() {
   const sessionStartTimeRef = useRef<number>(0);
   const lastActivityTimeRef = useRef<number>(0);
   const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const MAX_SESSION_DURATION = 15 * 60 * 1000; // 15 minutes
-  const INACTIVITY_TIMEOUT = 2 * 60 * 1000;    // 2 minutes
 
   const stopSessionPolicing = useCallback(() => {
     if (sessionTimeoutRef.current) {
@@ -436,7 +436,7 @@ export function useLiveAPI() {
         streamRef.current = null;
       }
     }
-  }, [isConnected, isConnecting, stopSessionPolicing, disconnect]);
+  }, [isConnected, isConnecting, disconnect]);
 
   return {
     isConnected,
