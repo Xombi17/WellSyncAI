@@ -1,23 +1,21 @@
 from fastapi import APIRouter
 
-from app.api.v1 import (
-    config,
-    ai,
-    auth,
-    dependents,
-    growth,
-    health_tips,
-    households,
-    medicine,
-    medicines,
-    migrate,
-    notifications,
-    pregnancy,
-    reminders,
-    sync,
-    timeline,
-    voice,
-)
+from . import ai
+from . import auth
+from . import config
+from . import dependents
+from . import growth
+from . import health_tips
+from . import households
+from . import medicine
+from . import medicines
+from . import migrate
+from . import notifications
+from . import pregnancy
+from . import reminders
+from . import sync
+from . import timeline
+from . import voice
 
 router = APIRouter(prefix="/api/v1")
 

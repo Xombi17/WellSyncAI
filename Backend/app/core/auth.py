@@ -4,7 +4,6 @@ from typing import Any
 import httpx
 import structlog
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import select
@@ -12,26 +11,38 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.database import get_session
+from app.core.password_service import PasswordService
 from app.models.household import Household
 
 settings = get_settings()
 log = structlog.get_logger()
 
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    try:
-        if pwd_context.identify(hashed_password):
-            return pwd_context.verify(plain_password, hashed_password)
-    except Exception:
-        pass
 
-    # Legacy seed data stored raw demo passwords in password_hash.
-    return plain_password == hashed_password
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain text password against a hash.
+
+    Args:
+        plain_password: Plain text password to verify
+        hashed_password: Hashed password to compare against
+
+    Returns:
+        True if password matches, False otherwise
+    """
+    return PasswordService.verify(plain_password, hashed_password)
+
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash a plain text password.
+
+    Args:
+        password: Plain text password to hash
+
+    Returns:
+        Hashed password string
+    """
+    return PasswordService.hash(password)
 
 def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()

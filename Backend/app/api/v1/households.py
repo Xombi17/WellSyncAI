@@ -33,28 +33,36 @@ async def create_household(
     body: HouseholdCreate,
     session: AsyncSession = Depends(get_session),
 ) -> Household:
+    """Create a new household with username and password.
+
+    Args:
+        body: HouseholdCreate schema with household details
+        session: Database session
+
+    Returns:
+        Created household as HouseholdResponse
+
+    Raises:
+        HTTPException: If username already exists or validation fails
+    """
     username = _normalize_username(body.username)
     password = body.password
 
-    body_data = body.model_dump(exclude_unset=True)
+    # Validate username and password are provided
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password are required")
 
-    if username and password:
-        result = await session.execute(select(Household).where(Household.username == username))
-        if result.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="Username already exists")
-        body_data["username"] = username
-        body_data["password_hash"] = get_password_hash(password)
-    elif username or password:
-        raise HTTPException(status_code=400, detail="Both username and password required")
-    else:
-        # If no username/password provided, but they are required in the DB, 
-        # we should probably fail early or have a default.
-        # For now, let's keep it as is but ensure we don't pop the username if it WAS provided.
-        pass
+    # Check for duplicate username
+    result = await session.execute(select(Household).where(Household.username == username))
+    if result.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Username already exists")
 
-    # Never pop username if it's a field in the model!
-    body_data.pop("password", None)
+    # Prepare household data
+    body_data = body.model_dump(exclude={"password"})  # Exclude password from dict
+    body_data["username"] = username
+    body_data["password_hash"] = get_password_hash(password)
 
+    # Create and persist household
     household = Household(**body_data)
     session.add(household)
     await session.flush()
@@ -97,6 +105,13 @@ async def update_household(
         raise HTTPException(status_code=404, detail="Household not found")
 
     update_data = body.model_dump(exclude_unset=True)
+
+    # Validate that immutable fields are not being updated
+    if "username" in update_data:
+        raise HTTPException(status_code=400, detail="Username cannot be updated")
+    if "password" in update_data:
+        raise HTTPException(status_code=400, detail="Password cannot be updated")
+
     for field, value in update_data.items():
         setattr(household, field, value)
     household.updated_at = datetime.utcnow()

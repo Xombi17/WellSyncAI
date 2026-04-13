@@ -11,6 +11,16 @@ class UserType(str, Enum):
     health_worker = "health_worker"
 
 
+# ─── Preference schemas ──────────────────────────────────────────────────────
+
+
+class HouseholdPreferences(BaseModel):
+    ai_tone: str = Field(default="simple")
+    language: str = Field(default="en")  # en, hi, mr
+    voice_mode: str = Field(default="regional")
+    health_focus: str = Field(default="general")
+
+
 # ─── Request schemas ─────────────────────────────────────────────────────────
 
 
@@ -23,6 +33,7 @@ class HouseholdCreate(BaseModel):
     village_town: str | None = Field(default=None, max_length=200)
     state: str | None = Field(default=None, max_length=100)
     district: str | None = Field(default=None, max_length=100)
+    preferences: HouseholdPreferences | None = None
 
 
 class HouseholdUpdate(BaseModel):
@@ -32,15 +43,8 @@ class HouseholdUpdate(BaseModel):
     village_town: str | None = None
     state: str | None = None
     district: str | None = None
-    preferences: dict | None = None
+    preferences: HouseholdPreferences | None = None
     last_onboarded_at: datetime | None = None
-
-
-class HouseholdPreferences(BaseModel):
-    ai_tone: str = Field(default="simple")
-    language: str = Field(default="en")  # en, hi, mr
-    voice_mode: str = Field(default="regional")
-    health_focus: str = Field(default="general")
 
 
 # ─── Response schemas ─────────────────────────────────────────────────────────
@@ -55,7 +59,7 @@ class HouseholdResponse(BaseModel):
     village_town: str | None
     state: str | None
     district: str | None
-    preferences: dict
+    preferences: HouseholdPreferences
     last_onboarded_at: datetime | None
     created_at: datetime
     updated_at: datetime
