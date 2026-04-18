@@ -1,7 +1,7 @@
 <div align="center">
-  <img width="1200" height="475" alt="WellSync AI Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img width="1200" height="475" alt="Vaxi Babu Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
   
-  # 📱 WellSync AI — Frontend
+  # 📱 Vaxi Babu — Frontend
   
   **The Cinematic, Voice-First Health Memory Dashboard for Every Family.**
   
@@ -15,7 +15,7 @@
 
 ## 🌟 Overview
 
-WellSync AI Frontend is a premium, high-fidelity web application designed to bridge the gap in preventive healthcare for families in low-access areas. It prioritizes **voice-first interaction**, **accessibility**, and **cinematic feedback** to ensure that caregivers—regardless of digital literacy—can easily manage their family's health.
+Vaxi Babu Frontend is a premium, high-fidelity web application designed to bridge the gap in preventive healthcare for families in low-access areas. It prioritizes **voice-first interaction**, **accessibility**, and **cinematic feedback** to ensure that caregivers—regardless of digital literacy—can easily manage their family's health.
 
 ## ✨ Key Features
 
@@ -38,10 +38,12 @@ WellSync AI Frontend is a premium, high-fidelity web application designed to bri
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+)
 - pnpm or npm
 
 ### Installation
+
 1. Clone the repository
 2. Navigate to the frontend directory:
    ```bash
@@ -80,4 +82,4 @@ NEXT_PUBLIC_VAPI_ASSISTANT_ID=your_assistant_id
 
 ---
 
-Built with ❤️ by **Varad Joshi** for WellSync AI.
+Built with ❤️ by **Varad Joshi** for Vaxi Babu.

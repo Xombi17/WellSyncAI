@@ -1,16 +1,19 @@
-# WellSync AI — Final Project Requirements Document
+# Vaxi Babu — Final Project Requirements Document
 
 ## Document purpose
-This document is the single source of truth for WellSync AI. Every human developer, coding agent, planner, reviewer, or automation system must read this file fully before creating, editing, reviewing, or deploying any part of the application.[web:149][web:163]
+
+This document is the single source of truth for Vaxi Babu. Every human developer, coding agent, planner, reviewer, or automation system must read this file fully before creating, editing, reviewing, or deploying any part of the application.[web:149][web:163]
 
 This file exists to reduce context loss, prevent conflicting parallel work, lower token waste across multiple AI sessions, and keep all implementation decisions aligned with the final product direction chosen for this project.[cite:158][cite:161]
 
 ## Mandatory instruction for all AI agents
+
 **Before doing any work, every AI agent must read this entire document first.**[web:149][web:163]
 
 No agent is allowed to start generating code, changing architecture, installing dependencies, or refactoring project structure before reading this file in full and acknowledging the rules defined here. This is mandatory because fragmented sessions and unshared context create conflicts, duplicate work, and token waste.[web:149][cite:161]
 
 ## Core operating rules
+
 - One shared source of truth: this file.
 - Update this file whenever major decisions change.
 - No parallel agents making overlapping edits to the same area at the same time.
@@ -22,27 +25,33 @@ No agent is allowed to start generating code, changing architecture, installing 
 - Every substantial implementation must end with a short update note added to this file or a linked changelog file.
 
 ## Project title
-**WellSync AI — Voice-First Health Memory System for Every Family**[cite:158]
+
+**Vaxi Babu — Voice-First Health Memory System for Every Family**[cite:158]
 
 ## Problem statement
+
 In many rural, low-access, and low-literacy communities, families miss important preventive healthcare actions such as vaccinations, pregnancy checkups, routine follow-ups, and child health milestones because information is fragmented, records are hard to maintain, literacy is limited, and reminders are not always understandable or actionable.[web:11][web:12]
 
 Most digital health products assume that users can read, navigate apps, understand schedules, and manage records themselves. That assumption breaks down in underserved settings, especially when connectivity is unstable and healthcare memory is distributed across multiple caregivers in a household.[web:11][web:12][web:18]
 
-WellSync AI solves this by turning health tracking into a proactive, voice-first, family-centered memory system that reminds, explains, and guides users using simple interactions and local-language support.[web:12][cite:158]
+Vaxi Babu solves this by turning health tracking into a proactive, voice-first, family-centered memory system that reminds, explains, and guides users using simple interactions and local-language support.[web:12][cite:158]
 
 ## Product vision
-WellSync AI should behave like a trusted family health memory assistant that helps households remember what is due, understand why it matters, and take preventive actions on time.[web:12][web:18]
+
+Vaxi Babu should behave like a trusted family health memory assistant that helps households remember what is due, understand why it matters, and take preventive actions on time.[web:12][web:18]
 
 It is not a diagnosis system, not a replacement for doctors, and not a generic chatbot. It is a structured preventive-care assistant built on deterministic health schedules with AI used only for explanation, translation, and natural interaction.[web:18][web:31][web:36]
 
 ## Final product direction
+
 The product must be built as a **voice-first preventive healthcare memory platform** for families, initially focused on child vaccination schedules and explainable health timelines, with future extensibility into pregnancy care, elder care, medicine adherence, and household preventive reminders.[cite:158][web:24][web:31]
 
 ## Final tech stack
+
 This is the locked stack unless explicitly changed in this document.
 
 ### Frontend
+
 - Next.js **16.2.3** with App Router.[web:92][web:163]
 - TypeScript.[web:92]
 - Tailwind CSS.
@@ -55,6 +64,7 @@ This is the locked stack unless explicitly changed in this document.
 - IndexedDB with Dexie for offline-first local data.
 
 ### Backend
+
 - FastAPI.
 - Python 3.11 or 3.12.
 - Pydantic schemas.
@@ -63,6 +73,7 @@ This is the locked stack unless explicitly changed in this document.
 - Orchestration layer for AI and voice logic.
 
 ### Database and ORM
+
 - Neon serverless Postgres.[web:79][web:81]
 - **SQLModel** (SQLAlchemy + Pydantic) as ORM for the backend — replaces Prisma for backend-only DB ownership.
 - **asyncpg** as the async Postgres driver.
@@ -70,21 +81,25 @@ This is the locked stack unless explicitly changed in this document.
 - Relational schema for households, dependents, health events, reminders, and conversation logs.
 
 ### Authentication
+
 - Auth.js / NextAuth with Prisma adapter.
 - Session strategy should remain simple for MVP.
 
 ### AI and intelligence
+
 - **GitHub Models** (`openai/gpt-4o`) for low-latency LLM responses via OpenAI-compatible endpoint.
 - LLM use is limited to explanation, simplification, translation, and conversational response generation.
 - Deterministic schedule logic must never be delegated to the LLM.
 - **OpenAI gpt-4o multimodal** for medicine OCR (image text extraction from packaging/precriptions).
 
 ### Voice stack
+
 - Vapi AI for live voice agent orchestration.[web:134][web:136]
 - Vapi provider stack handles live STT/TTS and streaming conversational flow.[web:153]
 - Browser Speech Synthesis may be retained as fallback only.
 
 ### Monorepo and tooling
+
 - Turborepo (planned for full monorepo).
 - pnpm workspaces (frontend).
 - ESLint, Prettier (frontend).
@@ -95,21 +110,25 @@ This is the locked stack unless explicitly changed in this document.
 - GitHub Actions for CI.
 
 ### Testing
+
 - Vitest.
 - React Testing Library.
 - **Pytest** + **pytest-asyncio** for async backend tests.
 - Playwright.
 
 ### Deployment
+
 - Vercel for frontend.
 - Railway or Render for backend.
 - Neon for database hosting.[web:79][web:81]
 
 ### Analytics and observability
+
 - PostHog for product analytics.
 - Basic structured logs for backend errors, voice failures, and sync failures.
 
 ## Why this stack is locked
+
 Next.js 16.2.3 is the latest stable direction and includes AI-oriented workflow improvements and better development ergonomics, which is useful when AI agents are assisting development.[web:92][web:149][web:163]
 
 Neon plus Prisma was selected over Convex and Supabase because the application has clearly relational data structures and benefits from schema clarity, SQL modeling, and long-term maintainability without Supabase’s paused free-project issue being part of the core stack choice.[web:79][web:81][web:95]
@@ -117,6 +136,7 @@ Neon plus Prisma was selected over Convex and Supabase because the application h
 Vapi was selected for the hackathon and MVP because it reduces live voice integration complexity and allows the team to ship faster with initial trial credits instead of building a custom low-latency voice transport stack from scratch.[web:136][web:137][web:145]
 
 ## Product goals
+
 - Help families remember upcoming and missed health actions.
 - Explain each action in simple language.
 - Provide live voice interaction in a natural, accessible interface.
@@ -125,6 +145,7 @@ Vapi was selected for the hackathon and MVP because it reduces live voice integr
 - Demonstrate a clear, working MVP suitable for a hackathon and a mini project.
 
 ## Non-goals
+
 - No medical diagnosis.
 - No emergency treatment guidance beyond static escalation instructions.
 - No autonomous medical decision-making.
@@ -133,43 +154,52 @@ Vapi was selected for the hackathon and MVP because it reduces live voice integr
 - No bloated admin panel in MVP.
 
 ## Target users
+
 - Parents and caregivers in low-literacy households.[web:11]
 - Families with children needing vaccination tracking.[web:24]
 - Multigenerational households where memory and responsibility are shared.
 - Future: ASHA workers, Anganwadi workers, and community health volunteers.[web:23][web:31]
 
 ## Core MVP features
+
 ### Feature 1: Household onboarding
+
 - Create household record.
 - Add caregiver details.
 - Add child profile with date of birth and language preference.
 
 ### Feature 2: Health timeline generation
+
 - Generate vaccination and preventive care timeline from DOB.
 - Mark events as upcoming, due, overdue, completed.
 - Show next action clearly.
 
 ### Feature 3: Voice-first interaction
+
 - User can ask questions by voice.
 - System listens in supported language.
 - System replies in simple voice output.
 - Live voice experience must be demo-ready.
 
 ### Feature 4: Simple health explanations
+
 - For each event, explain what it is, why it matters, and what action to take.
 - Response must be grounded in preapproved facts and structured schedule metadata.
 
 ### Feature 5: Reminders and status tracking
+
 - Show upcoming reminders.
 - Allow marking tasks done.
 - Allow acknowledgement or snooze.
 
 ### Feature 6: Offline-first support
+
 - Cache app shell.
 - Store core household and event timeline locally.
 - Queue updates for later sync.
 
 ## Future features
+
 - Pregnancy schedule support.
 - Multi-child household dashboard.
 - Elder care reminders.
@@ -179,6 +209,7 @@ Vapi was selected for the hackathon and MVP because it reduces live voice integr
 - Import/export integrations with future health platforms.
 
 ## Product behavior rules
+
 - Always present the next due or overdue health action prominently.
 - Prioritize clarity over feature density.
 - Use local-language-friendly phrasing.
@@ -188,6 +219,7 @@ Vapi was selected for the hackathon and MVP because it reduces live voice integr
 - Keep interface accessible for low digital literacy users.
 
 ## Health and safety rules
+
 - This product must never diagnose disease.
 - This product must never recommend unsafe treatment.
 - This product must never invent vaccine schedules.
@@ -197,20 +229,27 @@ Vapi was selected for the hackathon and MVP because it reduces live voice integr
 - All medical content must be presented as guidance, not authority.
 
 ## AI agent system design rules
+
 ### Rule 1: Read-first rule
+
 Every AI agent must read this file first before acting.[web:149][web:163]
 
 ### Rule 2: No blind parallelization
+
 Do not run multiple code-generation agents in parallel on overlapping tasks. If multiple agents are used, each must own a clearly separated area such as frontend UI, backend rules, or documentation, and their boundaries must be written down before work starts.[cite:161]
 
 ### Rule 3: Update-the-doc rule
+
 After important decisions, agents must update this file or a linked progress log so that future sessions inherit context without re-spending tokens.
 
 ### Rule 4: No architecture drift
+
 Agents must not change database provider, ORM, voice platform, framework version, or file structure conventions without explicit approval recorded in this file.
 
 ### Rule 5: Use existing context first
+
 Before asking for more context, agents should inspect:
+
 1. this document,
 2. the repo README,
 3. architecture docs,
@@ -219,21 +258,27 @@ Before asking for more context, agents should inspect:
 6. current schema and API contracts.
 
 ### Rule 6: Minimal token usage
+
 Agents should avoid repeatedly re-explaining context that already exists in repo docs. Instead, they should reference existing project files and operate incrementally.
 
 ### Rule 7: Deterministic-first rule
+
 If something can be handled by a rule engine or schema validation, do that first. Use LLM reasoning only where natural language, translation, summarization, or user communication is required.
 
 ### Rule 8: Structured outputs rule
+
 Agents should produce concise outputs: changed files, why they changed, what assumptions were made, and what remains to be done.
 
 ### Rule 9: Small diffs rule
+
 Agents should make focused changes in small units to reduce merge conflicts and review complexity.
 
 ### Rule 10: No duplicate dependencies
+
 Before adding any package, agent must check whether an existing dependency or native platform feature already solves the problem.
 
 ## Coding standards
+
 - TypeScript strict mode enabled.
 - Use shared types where possible.
 - Avoid unnecessary abstraction in MVP.
@@ -246,6 +291,7 @@ Before adding any package, agent must check whether an existing dependency or na
 - No dead code or unused packages in final submissions.
 
 ## Frontend rules
+
 - Use App Router only.
 - Keep routes simple and intentional.
 - Use server components where useful, client components only when needed.
@@ -256,6 +302,7 @@ Before adding any package, agent must check whether an existing dependency or na
 - Ensure voice controls are obvious and easy to trigger.
 
 ## Backend rules
+
 - Keep schedule generation deterministic and versioned.
 - Separate rule engine, voice orchestration, safety filtering, and API routing.
 - Expose clear schemas for request and response payloads.
@@ -263,6 +310,7 @@ Before adding any package, agent must check whether an existing dependency or na
 - Ensure idempotent updates where possible.
 
 ## Database rules
+
 - Schema must be normalized enough for clarity but not overengineered.
 - Prisma schema is authoritative for database modeling.
 - Use migrations consistently.
@@ -271,6 +319,7 @@ Before adding any package, agent must check whether an existing dependency or na
 - Keep health event records queryable and version-aware.
 
 ## Voice system rules
+
 - Live voice interaction must feel responsive.
 - Keep prompts short and clear.
 - Reduce conversational latency where possible.
@@ -279,6 +328,7 @@ Before adding any package, agent must check whether an existing dependency or na
 - Avoid expensive voice loops when a short answer is enough.
 
 ## Monorepo rules
+
 Recommended structure:
 
 ```text
@@ -300,18 +350,22 @@ wellsync-ai/
 ```
 
 Rules:
+
 - Frontend and backend must live in same monorepo.[cite:161]
 - Shared schemas and contracts must live in packages.
 - Docs must be stored in repo, not in chat only.
 - Every important prompt or agent instruction should be versioned.
 
 ## Token-saving strategy
+
 This section is mandatory for all AI-assisted development sessions.
 
 ### Why token waste happens
+
 Token waste usually comes from repeated re-explaining of product context, repeated architectural debates, long unstructured prompts, duplicated code generation attempts, and agents working without reading existing files first.
 
 ### Token-saving rules
+
 - Keep this document updated so future sessions reuse context instead of regenerating it.
 - Use short task-specific prompts after context is documented.
 - Ask agents to read exact files before coding instead of restating the whole project in every prompt.[web:149][web:163]
@@ -324,7 +378,9 @@ Token waste usually comes from repeated re-explaining of product context, repeat
 - Avoid asking multiple agents to solve the same problem independently.
 
 ### Best prompting pattern
+
 Use this pattern for coding agents:
+
 1. Read `wellsync_final_project_requirements.md`.
 2. Read the relevant files you will edit.
 3. Summarize only the task-specific context in 5 to 8 lines.
@@ -334,6 +390,7 @@ Use this pattern for coding agents:
 This reduces repeated token burn and keeps sessions deterministic.[web:149][web:163]
 
 ### Code generation best practices to save tokens
+
 - Prefer incremental diffs over full rewrites.
 - Keep functions short and purpose-specific.
 - Avoid excessive comments generated by AI.
@@ -344,7 +401,9 @@ This reduces repeated token burn and keeps sessions deterministic.[web:149][web:
 - Ask for exact deliverables: one endpoint, one migration, one UI state, one test.
 
 ### Documentation strategy to save tokens
+
 Create and maintain these files in the repo:
+
 - `docs/requirements/wellsync_final_project_requirements.md`
 - `docs/architecture/system-architecture.md`
 - `docs/prompts/agent-rules.md`
@@ -357,7 +416,9 @@ Create and maintain these files in the repo:
 Using `AGENTS.md` is especially helpful because newer Next.js workflows explicitly improve AI-assisted development patterns and agent-oriented project context handling.[web:149][web:163]
 
 ## Recommended session workflow for AI-assisted development
+
 ### At the start of every session
+
 1. Read this PRD.
 2. Read repo README.
 3. Read session log.
@@ -366,18 +427,21 @@ Using `AGENTS.md` is especially helpful because newer Next.js workflows explicit
 6. Confirm no one else is editing the same area.
 
 ### During implementation
+
 1. Make one scoped change.
 2. Run lint/tests where relevant.
 3. Update docs if decision changed.
 4. Commit with clear message.
 
 ### At session end
+
 1. Write short summary.
 2. Note pending blockers.
 3. Update changelog or task log.
 4. Record any changed assumptions.
 
 ## Deliverables expected in repo
+
 - Functional Next.js frontend.
 - Functional FastAPI backend.
 - Prisma schema and migrations.
@@ -391,18 +455,23 @@ Using `AGENTS.md` is especially helpful because newer Next.js workflows explicit
 - Prompt and agent operation docs.
 
 ## Final enforcement statement
-Any human or AI contributor who works on WellSync AI without reading and following this document is operating out of process. This document is mandatory context, mandatory architecture guidance, and mandatory coordination policy for the project.[web:149][cite:161]
+
+Any human or AI contributor who works on Vaxi Babu without reading and following this document is operating out of process. This document is mandatory context, mandatory architecture guidance, and mandatory coordination policy for the project.[web:149][cite:161]
 
 ## New feature addition: medicine safety checker
-This feature is now approved as an add-on module for WellSync AI. It should be treated as a **medicine safety double-check assistant** and not as a diagnosis tool.[web:172][web:171]
+
+This feature is now approved as an add-on module for Vaxi Babu. It should be treated as a **medicine safety double-check assistant** and not as a diagnosis tool.[web:172][web:171]
 
 ### Problem this feature addresses
+
 People sometimes self-medicate with common tablets, creams, painkillers, cold medicines, or antibiotics without checking whether the medicine may be risky for pregnancy, lactation, age, allergy status, or specific conditions. Public health guidance notes that medication safety in pregnancy is complex, medicine use during pregnancy is common, and safety information is incomplete for many medicines, so simple “safe/unsafe” assumptions are dangerous.[web:171][web:172][web:196]
 
 ### Purpose
+
 Allow a user to upload a photo of a medicine strip, medicine box, or printed prescription and ask whether the medicine may have important side effects, cautions, or pregnancy-related risk signals that require pharmacist or doctor consultation.[web:188][web:190]
 
 ### Scope for MVP
+
 - Upload image of medicine packaging, strip, or printed prescription.
 - Extract medicine text using OCR.
 - Normalize medicine name to a known record.
@@ -411,6 +480,7 @@ Allow a user to upload a photo of a medicine strip, medicine box, or printed pre
 - Escalate to “consult doctor/pharmacist urgently” when risk is high or confidence is low.
 
 ### Technical approach
+
 - **OCR layer:** PaddleOCR for printed prescriptions and medicine packaging extraction.[web:188][web:184][web:194]
 - **Preprocessing:** grayscale, denoising, skew correction, and text cleanup before extraction.[web:188]
 - **Drug knowledge layer:** use structured drug-label and safety sources such as FDA labeling resources and open drug data sources for warnings, pregnancy and lactation information, and adverse-effect summaries.[web:190][web:200]
@@ -418,6 +488,7 @@ Allow a user to upload a photo of a medicine strip, medicine box, or printed pre
 - **AI layer:** only simplifies results and explains them in user-friendly language; it must not independently infer medication safety.
 
 ### Safety rules for this feature
+
 - Never claim a medicine is universally safe.
 - Never provide diagnosis.
 - Never advise continuing or stopping prescription medication with strong authority.
@@ -426,19 +497,23 @@ Allow a user to upload a photo of a medicine strip, medicine box, or printed pre
 - When risk is unclear, respond conservatively and direct the user to a doctor or pharmacist.[web:172][web:205]
 
 ### UX response rules
+
 All responses should be short, plain-language, and bucketed:
+
 - Usually okay for common use
 - Use with caution
 - Not enough information
 - Avoid / talk to doctor now
 
 Every response should also include:
+
 - what medicine was detected,
 - what concern was checked,
 - why caution is needed,
 - what the user should do next.
 
 ### Suggested future extension
+
 This module can later support handwritten prescription parsing, allergy cross-checking, pregnancy week-based warnings, and medicine reminder integration into the household health timeline.[web:188][web:203]
 
 ---
@@ -478,6 +553,7 @@ This module can later support handwritten prescription parsing, allergy cross-ch
 - **Database layer:** Async SQLAlchemy engine with `pool_size=5`, `max_overflow=10`, `pool_pre_ping=True`. Auto-creates tables in dev via `create_db_and_tables()`. Proper session lifecycle with commit/rollback/close.
 
 **Current progress (Session 2026-04-11/12):**
+
 - ✅ **Frontend Assembly:** Next.js dashboard fully wired to FastAPI backend.
 - ✅ **Cinematic UX:** Integrated Framer Motion scroll animations and premium dark mode.
 - ✅ **Multi-Language Phase:** Support for English + 6 regional Indian languages (Hindi, Marathi, Gujarati, etc.).
@@ -487,6 +563,7 @@ This module can later support handwritten prescription parsing, allergy cross-ch
 - ✅ **Deployment:** Frontend live on Vercel, Backend live on Render.
 
 **Pending & Next Steps:**
+
 - Vapi webhook signature verification (re-enable in production).
 - Offline-first Service Worker hardening (PWA features).
 - Real-world testing with ASHA/Caregiver focus groups.

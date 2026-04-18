@@ -1,4 +1,4 @@
-# AGENTS.md — WellSync AI
+# AGENTS.md — Vaxi Babu
 
 ## Must Read First
 
@@ -19,6 +19,7 @@ WellSyncAI/
 ## Developer Commands
 
 ### Backend (FastAPI)
+
 ```bash
 cd Backend
 uv sync              # install deps
@@ -30,6 +31,7 @@ pytest tests/       # run tests (29/29 passing)
 ```
 
 ### Frontend (Next.js 16)
+
 ```bash
 cd Frontend
 npm install
@@ -38,6 +40,7 @@ npm run build        # production build
 ```
 
 ### Environment
+
 ```bash
 cp .env.example .env
 # Required: DATABASE_URL (Neon Postgres), GITHUB_TOKEN (GitHub Models PAT)
@@ -62,8 +65,8 @@ cp .env.example .env
 
 ## Voice Routing
 
-| Language | Provider | Model |
-|----------|----------|-------|
+| Language               | Provider    | Model                    |
+| ---------------------- | ----------- | ------------------------ |
 | All (en, hi, mr, etc.) | Gemini Live | gemini-3.1-flash-preview |
 
 - **Frontend/lib/gemini-voice.ts**: Gemini Live API integration (callback-based pattern)
@@ -77,6 +80,7 @@ cp .env.example .env
 ## Current Implementation State (Session 2026-04-12)
 
 ### Completed
+
 - ✅ FastAPI backend with async/await throughout
 - ✅ Neon Postgres connection via `asyncpg` (asyncpg-native SSL)
 - ✅ SQLModel: Household, Dependent, HealthEvent, Reminder, Conversation
@@ -91,6 +95,7 @@ cp .env.example .env
 - ✅ Settings page simplified - no premium mode modal
 
 ### Stack Changes (Approved)
+
 - **Replaced Groq with GitHub Models** (openai/gpt-4o)
 - **Replaced Ollama + Google Cloud Vision with OpenAI gpt-4o multimodal**
 - **Fixed Neon SSL** — removed `sslmode=require&channel_binding=require` from DATABASE_URL
@@ -98,6 +103,7 @@ cp .env.example .env
 - **Removed all Vapi/11Labs/ElevenLabs references** from frontend and backend
 
 ### Pending
+
 - Alembic migrations
 - Frontend integration (complete)
 - Offline PWA (Phase 4)

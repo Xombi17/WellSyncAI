@@ -1,4 +1,4 @@
-# WellSync AI — Frontend Design Document
+# Vaxi Babu — Frontend Design Document
 
 **Version:** 1.0
 **Date:** 2026-04-11
@@ -8,32 +8,34 @@
 
 ## Overview
 
-This document outlines the frontend design for WellSync AI, a voice-first health memory system for families. The frontend connects to the FastAPI backend and provides a mobile-first, accessible interface for low-literacy users.
+This document outlines the frontend design for Vaxi Babu, a voice-first health memory system for families. The frontend connects to the FastAPI backend and provides a mobile-first, accessible interface for low-literacy users.
 
 ---
 
 ## Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| Next.js 16 | Framework |
-| TypeScript | Type safety |
-| Tailwind CSS | Styling |
-| TanStack Query | Server state |
-| React Hook Form | Form handling |
-| Zod | Validation |
-| Framer Motion | Animations |
-| Prisma | Database ORM |
-| Dexie (future) | Offline storage |
+| Technology      | Purpose         |
+| --------------- | --------------- |
+| Next.js 16      | Framework       |
+| TypeScript      | Type safety     |
+| Tailwind CSS    | Styling         |
+| TanStack Query  | Server state    |
+| React Hook Form | Form handling   |
+| Zod             | Validation      |
+| Framer Motion   | Animations      |
+| Prisma          | Database ORM    |
+| Dexie (future)  | Offline storage |
 
 ---
 
 ## Pages Required
 
 ### 0. Landing Page (`/`)
+
 **Purpose:** Public landing page - first impression for new users
 
 **Features:**
+
 - App logo and tagline ("Your family's health memory")
 - Value proposition in simple language
 - Language selector (English / हिंदी)
@@ -44,6 +46,7 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 - Login link (for returning users)
 
 **Design:**
+
 - Clean, welcoming aesthetic
 - Minimal text (visual-first)
 - Large "Get Started" button
@@ -51,6 +54,7 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 - Fast load (static preferred)
 
 **Flow:**
+
 ```
 [Landing] → [Select Language] → [Create Household or Login] → [Dashboard]
 ```
@@ -58,9 +62,11 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 1. Dashboard/Home (`/`)
+
 **Purpose:** Quick action hub after login
 
 **Features:**
+
 - Welcome message with household name
 - "Next Due" card (most urgent health action)
 - Quick action buttons: "Add Child", "View Timeline", "Check Medicine"
@@ -69,6 +75,7 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 - Reminders count badge
 
 **Design:**
+
 - Action-oriented dashboard
 - Cards for key info
 - Large, touch-friendly buttons (min 56px tap targets)
@@ -77,6 +84,7 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 2. Onboarding - Create Household (`/households/new`)
+
 **Purpose:** Set up family unit
 
 **Form Fields:**
@@ -89,15 +97,18 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 | District | text | 0-100 chars | No |
 
 **Flow:**
+
 1. Enter household details
 2. Redirect to add first dependent
 
 ---
 
 ### 3. Household List (`/households`)
+
 **Purpose:** View and manage families
 
 **Features:**
+
 - List all households
 - Search/filter by name
 - Delete with confirmation
@@ -106,6 +117,7 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 4. Add Dependent (`/dependents/new`)
+
 **Purpose:** Add family member (child/pregnant/adult/elder)
 
 **Form Fields:**
@@ -123,9 +135,11 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 5. Dependent List (`/dependents`)
+
 **Purpose:** View family members
 
 **Features:**
+
 - List dependents by household
 - Filter by type
 - Show age/DOB
@@ -134,9 +148,11 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 6. Health Timeline (`/timeline/[dependent_id]`)
+
 **Purpose:** View vaccination and health schedule
 
 **Features:**
+
 - Timeline visualization (vertical)
 - Status badges: 🟢 Upcoming | 🟡 Due | 🔴 Overdue | ✅ Completed
 - Next due event at top (prominent)
@@ -149,6 +165,7 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 - AI explanation button per event
 
 **Event Card:**
+
 ```
 ┌────────────────────────────────────┐
 │ 💉 BCG                              │
@@ -161,17 +178,20 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 7. Medicine Safety Checker (`/medicine`)
+
 **Purpose:** Check medicine safety via image or name
 
 **Methods:**
 
 **A. Upload Image**
+
 - Drag & drop or camera capture
 - Supported: JPEG, PNG, WebP, HEIC
 - Show OCR extracted text
 - Display safety result
 
 **B. Enter Name**
+
 - Text input for medicine name
 - Optional: concern (pregnancy/children/allergy)
 - Display safety result
@@ -187,9 +207,11 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 8. Reminders (`/reminders`)
+
 **Purpose:** View pending reminders
 
 **Features:**
+
 - List by household/dependent
 - Filter by status (pending/snoozed/completed)
 - Snooze action (set date)
@@ -199,9 +221,11 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 ---
 
 ### 9. Settings (`/settings`)
+
 **Purpose:** App configuration
 
 **Options:**
+
 - Language (English/Hindi)
 - Notification preferences
 - Voice settings
@@ -213,62 +237,66 @@ This document outlines the frontend design for WellSync AI, a voice-first health
 
 ### Core Components
 
-| Component | Purpose |
-|-----------|---------|
-| Button | Primary, secondary, danger, voice triggers |
-| Input | Text, date, select, textarea |
-| Card | Event cards, summary cards |
-| Badge | Status indicators |
-| Timeline | Vertical health timeline |
-| VoiceButton | Microphone trigger for voice input |
-| LoadingState | Skeleton loaders |
-| EmptyState | No data states |
-| ErrorState | Error handling |
+| Component    | Purpose                                    |
+| ------------ | ------------------------------------------ |
+| Button       | Primary, secondary, danger, voice triggers |
+| Input        | Text, date, select, textarea               |
+| Card         | Event cards, summary cards                 |
+| Badge        | Status indicators                          |
+| Timeline     | Vertical health timeline                   |
+| VoiceButton  | Microphone trigger for voice input         |
+| LoadingState | Skeleton loaders                           |
+| EmptyState   | No data states                             |
+| ErrorState   | Error handling                             |
 
 ### Shared Types
 
 ```typescript
 interface Household {
-  id: string
-  name: string
-  primary_language: "en" | "hi"
-  village_town?: string
-  state?: string
-  district?: string
+  id: string;
+  name: string;
+  primary_language: "en" | "hi";
+  village_town?: string;
+  state?: string;
+  district?: string;
 }
 
 interface Dependent {
-  id: string
-  household_id: string
-  name: string
-  type: "child" | "adult" | "elder" | "pregnant"
-  date_of_birth: string
-  sex: "male" | "female" | "other"
-  expected_delivery_date?: string
+  id: string;
+  household_id: string;
+  name: string;
+  type: "child" | "adult" | "elder" | "pregnant";
+  date_of_birth: string;
+  sex: "male" | "female" | "other";
+  expected_delivery_date?: string;
 }
 
 interface HealthEvent {
-  id: string
-  dependent_id: string
-  household_id: string
-  name: string
-  schedule_key: string
-  category: "vaccination" | "checkup" | "vitamin" | "reminder"
-  dose_number?: number
-  due_date: string
-  window_start?: string
-  window_end?: string
-  status: "upcoming" | "due" | "overdue" | "completed"
-  completed_at?: string
-  completed_by?: string
-  location?: string
+  id: string;
+  dependent_id: string;
+  household_id: string;
+  name: string;
+  schedule_key: string;
+  category: "vaccination" | "checkup" | "vitamin" | "reminder";
+  dose_number?: number;
+  due_date: string;
+  window_start?: string;
+  window_end?: string;
+  status: "upcoming" | "due" | "overdue" | "completed";
+  completed_at?: string;
+  completed_by?: string;
+  location?: string;
 }
 
 interface MedicineCheck {
-  detected_medicine: string
-  bucket: "common_use" | "use_with_caution" | "insufficient_information" | "consult_doctor_urgently"
-  why_caution: string
-  next_step: string
+  detected_medicine: string;
+  bucket:
+    | "common_use"
+    | "use_with_caution"
+    | "insufficient_information"
+    | "consult_doctor_urgently";
+  why_caution: string;
+  next_step: string;
 }
 ```
 
@@ -278,19 +306,19 @@ interface MedicineCheck {
 
 ### Backend Endpoints
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/v1/households` | GET, POST | List/create households |
-| `/api/v1/households/:id` | GET, PUT, DELETE | Single household |
-| `/api/v1/dependents` | GET, POST | List/create dependents |
-| `/api/v1/dependents/:id` | GET, PUT, DELETE | Single dependent |
-| `/api/v1/timeline/:dependent_id` | GET | Get health timeline |
-| `/api/v1/timeline/:id/complete` | POST | Mark event complete |
-| `/api/v1/reminders` | GET | List reminders |
-| `/api/v1/medicine/check-name` | POST | Check medicine by name |
-| `/api/v1/medicine/check-image` | POST | Check medicine by image |
-| `/api/v1/ai/explain-event` | POST | AI explanation |
-| `/api/v1/voice/webhook` | POST | Vapi voice calls |
+| Endpoint                         | Method           | Purpose                 |
+| -------------------------------- | ---------------- | ----------------------- |
+| `/api/v1/households`             | GET, POST        | List/create households  |
+| `/api/v1/households/:id`         | GET, PUT, DELETE | Single household        |
+| `/api/v1/dependents`             | GET, POST        | List/create dependents  |
+| `/api/v1/dependents/:id`         | GET, PUT, DELETE | Single dependent        |
+| `/api/v1/timeline/:dependent_id` | GET              | Get health timeline     |
+| `/api/v1/timeline/:id/complete`  | POST             | Mark event complete     |
+| `/api/v1/reminders`              | GET              | List reminders          |
+| `/api/v1/medicine/check-name`    | POST             | Check medicine by name  |
+| `/api/v1/medicine/check-image`   | POST             | Check medicine by image |
+| `/api/v1/ai/explain-event`       | POST             | AI explanation          |
+| `/api/v1/voice/webhook`          | POST             | Vapi voice calls        |
 
 ### TanStack Query Setup
 
@@ -301,7 +329,7 @@ const keys = {
   dependents: (householdId: string) => ["dependents", householdId] as const,
   timeline: (dependentId: string) => ["timeline", dependentId] as const,
   reminders: (householdId: string) => ["reminders", householdId] as const,
-}
+};
 ```
 
 ---
@@ -318,23 +346,23 @@ const keys = {
 
 ## Animations (Framer Motion)
 
-| Animation | Use Case |
-|-----------|---------|
-| Fade in | Page transitions |
-| Slide up | Modal opens |
-| Scale tap | Button press feedback |
-| Stagger children | List items |
+| Animation        | Use Case              |
+| ---------------- | --------------------- |
+| Fade in          | Page transitions      |
+| Slide up         | Modal opens           |
+| Scale tap        | Button press feedback |
+| Stagger children | List items            |
 
 ---
 
 ## Responsive Breakpoints
 
-| Breakpoint | Width | Target |
-|------------|-------|--------|
-| sm | 640px | Mobile landscape |
-| md | 768px | Tablet |
-| lg | 1024px | Desktop |
-| xl | 1280px | Large desktop |
+| Breakpoint | Width  | Target           |
+| ---------- | ------ | ---------------- |
+| sm         | 640px  | Mobile landscape |
+| md         | 768px  | Tablet           |
+| lg         | 1024px | Desktop          |
+| xl         | 1280px | Large desktop    |
 
 **Mobile-first:** Design for 320px first, then scale up
 
@@ -343,6 +371,7 @@ const keys = {
 ## Implementation Priority
 
 ### P0 - Must Have
+
 1. Household create/list
 2. Dependent create/list
 3. Health timeline display
@@ -350,12 +379,14 @@ const keys = {
 5. Next due prominent display
 
 ### P1 - Should Have
+
 6. Medicine check by name
 7. Medicine check by image
 8. Reminders view
 9. Search/filter
 
 ### P2 - Nice to Have
+
 10. Settings page
 11. Voice trigger
 12. Offline support

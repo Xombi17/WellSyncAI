@@ -1,10 +1,10 @@
 import requests
 import streamlit as st
 
-st.set_page_config(page_title="WellSync AI Demo", page_icon="💉", layout="wide")
+st.set_page_config(page_title="Vaxi Babu Demo", page_icon="💉", layout="wide")
 API_URL = "http://localhost:8000/api/v1"
 
-st.title("🩺 WellSync AI — Backend Demo")
+st.title("🩺 Vaxi Babu — Backend Demo")
 st.markdown("Test all backend endpoints from this Streamlit UI.")
 
 
@@ -205,4 +205,4 @@ with tab3:
             st.error(f"Error: {resp.text}")
 
 st.markdown("---")
-st.caption("Powered by Streamlit + WellSync AI Backend")
+st.caption("Powered by Streamlit + Vaxi Babu Backend")

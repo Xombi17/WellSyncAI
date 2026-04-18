@@ -1,6 +1,6 @@
-# WellSync AI
+# Vaxi Babu
 
-**WellSync AI** is a cinematic, voice-first health memory system built to help families remember, understand, and act on essential preventive healthcare tasks such as vaccinations, routine checkups, and medicine-safety checks.
+**Vaxi Babu** is a cinematic, voice-first health memory system built to help families remember, understand, and act on essential preventive healthcare tasks such as vaccinations, routine checkups, and medicine-safety checks.
 
 The project is designed for low-access and low-literacy contexts, where healthcare actions are often missed not because of negligence, but because of fragmented records, weak reminder systems, limited digital literacy, and lack of simple guidance.
 
@@ -8,7 +8,7 @@ The project is designed for low-access and low-literacy contexts, where healthca
 
 ## 🌟 Vision
 
-WellSync AI acts like a high-performance family health memory assistant.
+Vaxi Babu acts like a high-performance family health memory assistant.
 
 Instead of expecting users to manually track medical schedules, it provides a **premium, interactive experience** that:
 
@@ -24,14 +24,14 @@ Instead of expecting users to manually track medical schedules, it provides a **
 
 ## 📊 Project Status (2026-04-13)
 
-| Phase | Status | Completion |
-|-------|--------|-----------|
-| Phase 1: Backend Foundation | ✅ Complete | 100% |
-| Phase 2: Frontend Core | ✅ Complete | 100% |
-| Phase 3: Voice & AI | ✅ Complete | 100% |
-| Phase 4: Offline PWA | ⏳ Pending | 0% |
-| Phase 5: Deployment & Launch | ⏳ Pending | 0% |
-| Phase 6: Database Migration (Supabase) | ✅ Complete | 100% |
+| Phase                                  | Status      | Completion |
+| -------------------------------------- | ----------- | ---------- |
+| Phase 1: Backend Foundation            | ✅ Complete | 100%       |
+| Phase 2: Frontend Core                 | ✅ Complete | 100%       |
+| Phase 3: Voice & AI                    | ✅ Complete | 100%       |
+| Phase 4: Offline PWA                   | ⏳ Pending  | 0%         |
+| Phase 5: Deployment & Launch           | ⏳ Pending  | 0%         |
+| Phase 6: Database Migration (Supabase) | ✅ Complete | 100%       |
 
 **Overall Progress:** 65% | **Build Status:** ✅ Production Ready
 
@@ -40,6 +40,7 @@ Instead of expecting users to manually track medical schedules, it provides a **
 ## 🛠️ Tech Stack
 
 ### Frontend & UI
+
 - **Next.js 15 (App Router)** — High-performance React framework with TypeScript strict mode.
 - **TypeScript** — Full type safety across all components and hooks.
 - **Tailwind CSS** — Modern utility-first CSS with dark mode support.
@@ -52,6 +53,7 @@ Instead of expecting users to manually track medical schedules, it provides a **
 - **IndexedDB + Dexie** — Local caching and offline-first data persistence.
 
 ### Backend (Robust & Async)
+
 - **FastAPI** — High-performance Python 3.11+ async web framework.
 - **SQLModel** — Typed ORM for clean database schema ownership.
 - **Supabase PostgreSQL** — Cloud-hosted database with Transaction Pooler.
@@ -62,12 +64,14 @@ Instead of expecting users to manually track medical schedules, it provides a **
 - **Pydantic** — Data validation and serialization.
 
 ### AI & Intelligence
+
 - **Google Gemini Live (gemini-3.1-flash-preview)** — Real-time voice for all languages (English, Hindi, Marathi, etc.).
 - **GitHub Models (GPT-4o)** — Low-latency LLM for natural language interactions.
 - **GPT-4o Multimodal** — Unified OCR and analysis for medicine safety checks.
 - **Deterministic Rule Engines** — AI never decides medical safety or schedules; it only explains them.
 
 ### DevOps & Deployment
+
 - **Docker** — Containerization for both frontend and backend.
 - **GitHub Actions** — CI/CD pipelines for testing, linting, and deployment.
 - **Vercel** — Frontend deployment with preview environments.
@@ -79,6 +83,7 @@ Instead of expecting users to manually track medical schedules, it provides a **
 ## 🚀 Core Features
 
 ### 1. Cinematic Health Timeline
+
 - **Deterministic Generation:** Automatically builds vaccination and checkup schedules based on India's NIS.
 - **Life-Stage Aware:** Supports profiles for infants, children, adults, elders, and expectant mothers.
 - **Smart Status:** Identifies `Upcoming`, `Due`, `Overdue`, and `Completed` events at a glance.
@@ -86,6 +91,7 @@ Instead of expecting users to manually track medical schedules, it provides a **
 - **Health Score Calculation:** Real-time health metrics based on completion rates and overdue items.
 
 ### 2. Multi-Language Voice Assistant
+
 - **7+ Languages:** Full support for English, Hindi, Marathi, Bengali, Tamil, Telugu, and Gujarati.
 - **Gemini Live Integration:** Real-time voice conversations with context awareness.
 - **Context-Aware:** The voice assistant knows who you are and who your children are.
@@ -93,6 +99,7 @@ Instead of expecting users to manually track medical schedules, it provides a **
 - **Tool Calling:** Voice can query household dependents and vaccination status.
 
 ### 3. Vaccination Verification System
+
 - **Mark as Given:** Parents can mark vaccinations as given/not given.
 - **ASHA Worker Verification:** ASHA workers can verify vaccinations with notes.
 - **Document Upload:** Support for uploading verification documents.
@@ -100,23 +107,27 @@ Instead of expecting users to manually track medical schedules, it provides a **
 - **Dummy Data:** Pre-populated verified vaccinations with ASHA worker names (Priya, Anjali, Meera).
 
 ### 4. Reminders Management
+
 - **Upcoming Reminders:** Dashboard widget showing next due health events.
 - **Custom Reminders:** Create custom reminders for any health event.
 - **Reminder History:** Track all past reminders and their status.
 - **Notification Ready:** Infrastructure for SMS/push notifications (Twilio integration ready).
 
 ### 5. Authentication & Security
+
 - **JWT-Based Auth:** Secure token management with expiration checking.
 - **Auth Guards:** Protected routes with automatic redirect to login.
 - **Session Management:** Proper token refresh and logout flows.
 - **Demo Families:** Quick access with pre-seeded demo accounts (Sharma, Patel, Kumar, Singh, Verma).
 
 ### 6. AI Medicine Safety Scanner
+
 - **Multimodal OCR:** Upload a photo of any medicine strip or prescription.
 - **Safety Classification:** Rule-based logic buckets results into `Common Use`, `Use with Caution`, or `Consult Doctor Urgently`.
 - **Explainable Results:** AI simplifies complex medical cautions into easy-to-understand advice.
 
 ### 7. Offline-First PWA
+
 - **Reliable in Remote Areas:** Caches critical health data locally.
 - **Installable:** Works like a native mobile app without requiring App Store downloads.
 - **Background Sync:** Syncs data automatically when internet connectivity is restored.
@@ -225,6 +236,7 @@ WellSync Vaxi/
 ## 🚦 Getting Started
 
 ### Prerequisites
+
 - Node.js 20+ (Frontend)
 - Python 3.11+ (Backend)
 - Docker & Docker Compose (optional, for containerized setup)
@@ -293,7 +305,8 @@ docker-compose up -d
 
 ## 🌍 Supported Languages
 
-WellSync AI aims to bridge the literacy and language gap by supporting:
+Vaxi Babu aims to bridge the literacy and language gap by supporting:
+
 - 🇺🇸 English
 - 🇮🇳 Hindi (हिन्दी)
 - 🇮🇳 Marathi (मराठी)
@@ -307,19 +320,23 @@ WellSync AI aims to bridge the literacy and language gap by supporting:
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 cd Frontend
 npm run test:run
 ```
+
 - Auth utilities: 100% coverage
 - All hooks tested
 - API client tested
 
 ### E2E Tests
+
 ```bash
 cd Frontend
 npm run e2e
 ```
+
 - Login flow (demo families)
 - Dependent creation
 - Timeline navigation
@@ -327,10 +344,12 @@ npm run e2e
 - Multi-browser support (Chromium, Firefox, WebKit)
 
 ### Backend Tests
+
 ```bash
 cd Backend
 pytest
 ```
+
 - API endpoint tests
 - Database model tests
 - Service layer tests
@@ -340,12 +359,14 @@ pytest
 ## 🚀 Deployment
 
 ### Frontend (Vercel)
+
 ```bash
 cd Frontend
 vercel --prod
 ```
 
 ### Backend (Render/Railway)
+
 1. Connect GitHub repository
 2. Set environment variables from `.env.example`
 3. Deploy
@@ -357,6 +378,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 ## 📋 Recent Changes (2026-04-13)
 
 ### Phase 2: Frontend Core (Complete)
+
 - ✅ JWT authentication with token management
 - ✅ Auth guards and protected routes
 - ✅ Household & dependent CRUD operations
@@ -367,6 +389,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 - ✅ Vercel deployment configuration
 
 ### Quick Task: Vaccination Verification (Complete)
+
 - ✅ Backend verification fields and endpoints
 - ✅ ASHA worker verification system
 - ✅ Document upload capability
@@ -376,6 +399,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 - ✅ Dummy data with verified vaccinations
 
 ### Infrastructure
+
 - ✅ Docker containerization (frontend & backend)
 - ✅ GitHub Actions workflows (security, tests, builds)
 - ✅ Environment validation at startup
@@ -387,19 +411,22 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 ## 🔐 Security & Compliance
 
 ### Authentication
+
 - JWT-based authentication with expiration checking
 - Secure token storage (localStorage with HttpOnly cookie support)
 - Auth guards on all protected routes
 - Automatic logout on 401 responses
 
 ### Data Protection
+
 - All sensitive data stored in Supabase with RLS policies
 - Environment variables for all secrets
 - No hardcoded credentials in codebase
 - CORS properly configured
 
 ### Medical Safety
-- **WellSync AI is NOT a diagnostic system**
+
+- **Vaxi Babu is NOT a diagnostic system**
 - All schedules derived from deterministic public health rules (India NIS)
 - AI only explains health events, never diagnoses
 - Always recommends consulting healthcare professionals
@@ -410,6 +437,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 ## 📊 Build & Performance
 
 ### Frontend
+
 - **Build Size:** 159 kB First Load JS
 - **Routes:** 21 pages (all compiled)
 - **Performance:** Optimized with Next.js static generation
@@ -417,6 +445,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 - **Dark Mode:** Full support
 
 ### Backend
+
 - **Framework:** FastAPI (async/await)
 - **Database:** Supabase PostgreSQL with Transaction Pooler
 - **Response Time:** <100ms for most endpoints
@@ -427,6 +456,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 ## 🤝 Contributing
 
 This is an active development project. For contributions:
+
 1. Create a feature branch
 2. Make atomic commits
 3. Add tests for new features

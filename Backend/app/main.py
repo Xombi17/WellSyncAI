@@ -1,5 +1,5 @@
 """
-WellSync AI — FastAPI Application Entry Point
+Vaxi Babu — FastAPI Application Entry Point
 """
 
 from contextlib import asynccontextmanager
@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="WellSync AI — Backend API",
+    title="Vaxi Babu — Backend API",
     description=(
         "Voice-first health memory system API. "
         "Provides vaccination timelines, medicine safety checks, "

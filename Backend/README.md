@@ -1,17 +1,17 @@
-# ⚙️ WellSync AI — Backend
+# ⚙️ Vaxi Babu — Backend
 
 **High-Performance FastAPI Service for Health Timelines and AI Orchestration.**
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)](https://www.python.org/)
 [![SQLModel](https://img.shields.io/badge/SQLModel-0.0.14-009485?style=for-the-badge&logo=pydantic)](https://sqlmodel.tiangolo.com/)
-[![GitHub Models](https://img.shields.io/badge/AI-GitHub_Models_(GPT--4o)-black?style=for-the-badge)](https://github.com/marketplace/models)
+[![GitHub Models](<https://img.shields.io/badge/AI-GitHub_Models_(GPT--4o)-black?style=for-the-badge>)](https://github.com/marketplace/models)
 
 ---
 
 ## 🌟 Overview
 
-The WellSync AI Backend is a robust, asynchronous Python service that manages family health records, generates deterministic healthcare timelines, and orchestrates AI-driven medical safety checks and voice interactions.
+The Vaxi Babu Backend is a robust, asynchronous Python service that manages family health records, generates deterministic healthcare timelines, and orchestrates AI-driven medical safety checks and voice interactions.
 
 ## ✨ Key Features
 
@@ -25,10 +25,12 @@ The WellSync AI Backend is a robust, asynchronous Python service that manages fa
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python 3.11 or 3.12
 - [uv](https://astral.sh/uv) (Recommended for lightning-fast dependency management)
 
 ### Installation
+
 1. Navigate to the backend directory:
    ```bash
    cd Backend
@@ -45,6 +47,7 @@ The WellSync AI Backend is a robust, asynchronous Python service that manages fa
 4. Configure your `.env` with a `DATABASE_URL` (Neon) and `GITHUB_TOKEN`.
 
 ### Running the Server
+
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
 ```
@@ -73,4 +76,4 @@ pytest tests/ -v
 
 ---
 
-Built with ❤️ by **Varad Joshi** for WellSync AI.
+Built with ❤️ by **Varad Joshi** for Vaxi Babu.

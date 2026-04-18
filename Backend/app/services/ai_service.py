@@ -38,7 +38,7 @@ def get_ai_client() -> AsyncOpenAI:
 # System prompt shared across all health explanation calls
 # ─────────────────────────────────────────────────────────────────────────────
 
-_SYSTEM_PROMPT = """You are a helpful health assistant for WellSync AI.
+_SYSTEM_PROMPT = """You are a helpful health assistant for Vaxi Babu.
 Your job is to explain health events (vaccinations, checkups) in very simple language
 for families in rural India. Many users have limited health literacy.
 

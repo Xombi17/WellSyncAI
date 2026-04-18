@@ -1,7 +1,7 @@
 [project]
 name = "wellsync-ai-backend"
 version = "0.1.0"
-description = "WellSync AI — Voice-First Health Memory System Backend"
+description = "Vaxi Babu — Voice-First Health Memory System Backend"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",
