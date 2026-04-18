@@ -38,10 +38,10 @@ export default function TimelinePage() {
     createMutation.mutate({
       depId,
       event: {
-        title: newTitle,
+        name: newTitle,
         category: newCategory as any,
-        date: newDate,
-        description: newNotes,
+        due_date: newDate,
+        notes: newNotes,
         status: 'upcoming' as any
       }
     }, {
@@ -64,7 +64,7 @@ export default function TimelinePage() {
 
   const allEvents = [...rawEvents].sort((a: any, b: any) => {
     const order: Record<string, number> = { overdue: 0, due: 1, upcoming: 2, completed: 3 };
-    return (order[a.status] ?? 4) - (order[b.status] ?? 4) || new Date(a.date).getTime() - new Date(b.date).getTime();
+    return (order[a.status] ?? 4) - (order[b.status] ?? 4) || new Date(a.due_date || a.date).getTime() - new Date(b.due_date || b.date).getTime();
   });
 
   const filtered = filter === 'all' ? allEvents : allEvents.filter((e: any) => e.category === filter);
@@ -139,13 +139,13 @@ export default function TimelinePage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-medium text-white">{event.title}</p>
+                          <p className="text-sm font-medium text-white">{event.name || event.title}</p>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${sc.text} ${sc.bg} ${sc.border}`}>{event.status}</span>
                         </div>
-                        <p className="text-xs text-white/30 mt-0.5">{event.description}</p>
+                        <p className="text-xs text-white/30 mt-0.5">{event.notes || event.description}</p>
                         <div className="flex items-center gap-3 mt-2">
                           {!depId && <span className="text-xs text-white/40">{event.dep_avatar} {event.dep_name}</span>}
-                          <span className="text-xs text-white/20">{new Date(event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          <span className="text-xs text-white/20">{new Date(event.due_date || event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         </div>
                       </div>
                     </div>
