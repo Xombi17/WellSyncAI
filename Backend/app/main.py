@@ -70,6 +70,15 @@ app.add_middleware(
 app.include_router(v1_router)
 
 
+@app.get("/", tags=["Root"])
+async def root():
+    return {
+        "app": "Vaxi Babu — Backend API",
+        "status": "online",
+        "version": "0.1.0"
+    }
+
+
 @app.get("/health", tags=["Health Check"])
 async def health_check():
     return {"status": "ok", "version": "0.1.0", "env": settings.app_env}
