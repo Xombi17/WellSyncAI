@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/routing/app_router.dart';
+import '../core/sync/offline_sync_manager.dart';
 
 class VaxiBabuApp extends ConsumerWidget {
   const VaxiBabuApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(offlineSyncManagerProvider);
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
@@ -32,4 +34,3 @@ class VaxiBabuApp extends ConsumerWidget {
     );
   }
 }
-

@@ -591,6 +591,20 @@ This module can later support handwritten prescription parsing, allergy cross-ch
 - `flutter analyze` — passed with no issues.
 - `flutter test` — passed.
 
+### Session: 2026-04-26 — Additive Flutter Mobile Client (Phase 6)
+
+**What was built:**
+
+- Added a shared offline mutation queue in the Flutter `Mobile/` client using `SharedPreferences`.
+- Added an offline sync manager that listens for connectivity recovery and replays queued mutations through `/api/v1/sync/batch`.
+- Wired timeline `mark-given` and `verify` actions to queue automatically when the network is unavailable.
+- Added optimistic local timeline updates for offline `mark-given` actions so the user gets immediate feedback.
+
+**Verification:**
+
+- `flutter analyze` — passed with no issues.
+- `flutter test` — passed.
+
 ### Session: 2026-04-11 — Backend Foundation
 
 **What was built:**

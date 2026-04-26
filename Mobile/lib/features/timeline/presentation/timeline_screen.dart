@@ -23,20 +23,36 @@ class TimelineScreen extends ConsumerStatefulWidget {
 
 class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   final Set<String> _busyEventIds = <String>{};
+  final Map<String, TimelineEvent> _optimisticEvents = <String, TimelineEvent>{};
 
   Future<void> _markGiven(TimelineEvent event) async {
     setState(() => _busyEventIds.add(event.id));
     try {
-      await ref.read(timelineRepositoryProvider).markEventGiven(
+      final outcome = await ref.read(timelineRepositoryProvider).markEventGiven(
             dependentId: widget.dependentId,
             eventId: event.id,
           );
-      ref.invalidate(timelineProvider(widget.dependentId));
+      if (outcome.queuedOffline) {
+        setState(() {
+          _optimisticEvents[event.id] = _optimisticMarkGiven(event);
+        });
+      } else {
+        setState(() {
+          _optimisticEvents.remove(event.id);
+        });
+        ref.invalidate(timelineProvider(widget.dependentId));
+      }
       if (!mounted) {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Marked as given. Waiting for verification.')),
+        SnackBar(
+          content: Text(
+            outcome.queuedOffline
+                ? 'Saved offline. It will sync when the connection returns.'
+                : 'Marked as given. Waiting for verification.',
+          ),
+        ),
       );
     } catch (error) {
       if (!mounted) {
@@ -63,18 +79,33 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
 
     setState(() => _busyEventIds.add(event.id));
     try {
-      await ref.read(timelineRepositoryProvider).verifyEvent(
+      final outcome = await ref.read(timelineRepositoryProvider).verifyEvent(
             dependentId: widget.dependentId,
             eventId: event.id,
             verifiedBy: request.verifiedBy,
             verificationNotes: request.verificationNotes,
           );
-      ref.invalidate(timelineProvider(widget.dependentId));
+      if (outcome.queuedOffline) {
+        setState(() {
+          _optimisticEvents[event.id] = _optimisticVerifyPending(event);
+        });
+      } else {
+        setState(() {
+          _optimisticEvents.remove(event.id);
+        });
+        ref.invalidate(timelineProvider(widget.dependentId));
+      }
       if (!mounted) {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vaccination verified.')),
+        SnackBar(
+          content: Text(
+            outcome.queuedOffline
+                ? 'Verification saved offline. It will sync when online.'
+                : 'Vaccination verified.',
+          ),
+        ),
       );
     } catch (error) {
       if (!mounted) {
@@ -152,7 +183,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                 ...List.generate(
                   timeline.events.length,
                   (index) {
-                    final event = timeline.events[index];
+                    final event = _effectiveEvent(timeline.events[index]);
                     final isLast = index == timeline.events.length - 1;
                     final isBusy = _busyEventIds.contains(event.id);
                     return _TimelineStepCard(
@@ -186,6 +217,67 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
         ),
       ),
+    );
+  }
+
+  TimelineEvent _effectiveEvent(TimelineEvent event) {
+    return _optimisticEvents[event.id] ?? event;
+  }
+
+  TimelineEvent _optimisticMarkGiven(TimelineEvent event) {
+    final now = DateTime.now();
+    return TimelineEvent(
+      id: event.id,
+      dependentId: event.dependentId,
+      householdId: event.householdId,
+      name: event.name,
+      scheduleKey: event.scheduleKey,
+      category: event.category,
+      doseNumber: event.doseNumber,
+      dueDate: event.dueDate,
+      windowStart: event.windowStart,
+      windowEnd: event.windowEnd,
+      status: event.status,
+      completedAt: event.completedAt,
+      completedBy: event.completedBy,
+      location: event.location,
+      notes: event.notes,
+      verificationStatus: VerificationStatus.pending,
+      verifiedBy: event.verifiedBy,
+      verificationDocumentUrl: event.verificationDocumentUrl,
+      verificationNotes: event.verificationNotes,
+      markedGivenAt: now,
+      scheduleVersion: event.scheduleVersion,
+      createdAt: event.createdAt,
+      updatedAt: now,
+    );
+  }
+
+  TimelineEvent _optimisticVerifyPending(TimelineEvent event) {
+    return TimelineEvent(
+      id: event.id,
+      dependentId: event.dependentId,
+      householdId: event.householdId,
+      name: event.name,
+      scheduleKey: event.scheduleKey,
+      category: event.category,
+      doseNumber: event.doseNumber,
+      dueDate: event.dueDate,
+      windowStart: event.windowStart,
+      windowEnd: event.windowEnd,
+      status: event.status,
+      completedAt: event.completedAt,
+      completedBy: event.completedBy,
+      location: event.location,
+      notes: event.notes,
+      verificationStatus: VerificationStatus.pending,
+      verifiedBy: event.verifiedBy,
+      verificationDocumentUrl: event.verificationDocumentUrl,
+      verificationNotes: event.verificationNotes,
+      markedGivenAt: event.markedGivenAt,
+      scheduleVersion: event.scheduleVersion,
+      createdAt: event.createdAt,
+      updatedAt: DateTime.now(),
     );
   }
 }
