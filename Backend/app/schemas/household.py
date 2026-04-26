@@ -1,8 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, Field, field_validator
 
 class UserType(str, Enum):
     family = "family"
@@ -59,9 +58,16 @@ class HouseholdResponse(BaseModel):
     village_town: str | None
     state: str | None
     district: str | None = None
-    preferences: HouseholdPreferences | dict | None = None
+    preferences: HouseholdPreferences = Field(default_factory=HouseholdPreferences)
     last_onboarded_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("preferences", mode="before")
+    @classmethod
+    def default_preferences(cls, v):
+        if v is None:
+            return {}
+        return v
 
     model_config = {"from_attributes": True}
