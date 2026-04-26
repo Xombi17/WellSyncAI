@@ -520,6 +520,63 @@ This module can later support handwritten prescription parsing, allergy cross-ch
 
 ## Implementation Progress Log
 
+### Session: 2026-04-26 — Additive Flutter Mobile Client (Phase 1)
+
+**What was built:**
+
+- Added a new `Mobile/` workspace as an additive Flutter client for Vaxi Babu. This does **not** replace the locked Next.js frontend; it is a separate mobile surface responding to an explicit product request.
+- Scaffolded Riverpod app bootstrap, `go_router` navigation, shared-preferences token persistence, and a `Dio` API layer targeting `https://well-sync-ai-pearl.vercel.app/api/v1`.
+- Implemented bearer-token injection and 401 token clearing in the Flutter networking layer.
+- Added placeholder splash, login, and dashboard screens so the Phase 1 scaffold is runnable once Flutter SDK tooling is available.
+
+**Constraints:**
+
+- Flutter SDK was not installed in the coding environment, so platform runners were not generated in-session.
+- The scaffold is prepared for `flutter create .` followed by `flutter pub get` once Flutter is available locally.
+
+### Session: 2026-04-26 — Additive Flutter Mobile Client (Phase 2)
+
+**What was built:**
+
+- Added typed Dart models for `Household`, `Dependent`, `TimelineEvent`/`TimelineResponse`, `MedicineSafetyResponse`, and auth token payloads in the Flutter `Mobile/` workspace.
+- Implemented a real auth repository and auth controller around the backend `/api/v1/login` contract, including form-encoded login and persisted session restore from shared preferences.
+- Upgraded routing so splash, login, and dashboard are guarded by auth state rather than placeholder navigation.
+- Replaced the stub login screen with a functioning Material 3 form using loading and error states.
+
+**Constraints:**
+
+- Flutter SDK and codegen tooling were still unavailable in the session, so `flutter pub get`, `build_runner`, and `flutter analyze` could not be executed.
+- Model `.g.dart` files were added manually to keep the Phase 2 scaffold self-contained until local Flutter tooling is available.
+
+### Session: 2026-04-26 — Additive Flutter Mobile Client (Phase 3)
+
+**What was built:**
+
+- Ran Flutter dependency resolution successfully in the `Mobile/` workspace using the local SDK.
+- Added a bottom-navigation app shell for `Home`, `Dependents`, `Reminders`, and `Settings`.
+- Implemented repositories and Riverpod providers for `households`, `dependents`, and `reminders` using the live backend API.
+- Replaced the placeholder dashboard with a data-backed home screen showing household summary, dependents, and upcoming reminders.
+- Added Flutter-specific ignore rules for local build artifacts and platform-generated files.
+
+**Verification:**
+
+- `flutter analyze` — passed with no issues.
+- `flutter test` — passed.
+
+### Session: 2026-04-26 — Additive Flutter Mobile Client (Phase 4)
+
+**What was built:**
+
+- Added a dependent timeline detail flow in the Flutter `Mobile/` client with nested routing under the dependents section.
+- Implemented timeline repository and provider logic against `/api/v1/timeline/{dependent_id}` plus timeline event mutations.
+- Added event actions for `mark-given`, `verify`, and `Explain this`, including an AI explanation bottom sheet using `/api/v1/ai/explain-event`.
+- Built a vertical timeline presentation showing due state, verification state, due date, and event category for each item.
+
+**Verification:**
+
+- `flutter analyze` — passed with no issues.
+- `flutter test` — passed.
+
 ### Session: 2026-04-11 — Backend Foundation
 
 **What was built:**

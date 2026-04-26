@@ -1,0 +1,22 @@
+.dart_tool/
+.fvm/
+.idea/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+.pub/
+coverage/
+build/
+*.iml
+pubspec_overrides.yaml
+
+# Generated platform-local files
+android/.gradle/
+android/local.properties
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/

@@ -102,3 +102,5 @@ Frontend/test-results/*
 
 Android/*
 /Android/
+
+Backend/.codex
