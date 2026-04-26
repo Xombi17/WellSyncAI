@@ -13,6 +13,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
 from app.models.health_event import HealthEvent
+from app.models.household import Household
 from app.services.ai_service import answer_voice_question, explain_health_event
 from app.services.health_schedule.rules import _load_schedule
 

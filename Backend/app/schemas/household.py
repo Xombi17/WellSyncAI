@@ -58,8 +58,8 @@ class HouseholdResponse(BaseModel):
     user_type: UserType
     village_town: str | None
     state: str | None
-    district: str | None
-    preferences: HouseholdPreferences
+    district: str | None = None
+    preferences: HouseholdPreferences | dict | None = None
     last_onboarded_at: datetime | None
     created_at: datetime
     updated_at: datetime
