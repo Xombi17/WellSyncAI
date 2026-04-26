@@ -16,31 +16,17 @@ from app.schemas.timeline import (
 )
 from app.services.health_schedule.engine import (
     generate_and_save_schedule,
+    generate_pregnancy_schedule,
+    generate_growth_check_schedule,
     get_next_due_event,
     refresh_event_statuses,
 )
+from app.models.dependent import DependentType
 
 router = APIRouter(prefix="/timeline", tags=["Timeline"])
 log = structlog.get_logger()
 
-
-@router.post("/{dependent_id}/events", response_model=HealthEventResponse)
-async def create_manual_event(
-    dependent_id: str,
-    event: HealthEvent,
-    session: AsyncSession = Depends(get_session),
-) -> HealthEvent:
-    """Create a manual health event."""
-    event.dependent_id = dependent_id
-    event.is_automated = False
-    event.status = event.status or EventStatus.upcoming
-    event.created_at = datetime.utcnow()
-    event.updated_at = datetime.utcnow()
-    session.add(event)
-    await session.flush()
-    await session.refresh(event)
-    return event
-
+# ... rest of methods ...
 
 @router.get("/{dependent_id}", response_model=TimelineResponse)
 async def get_timeline(
@@ -62,13 +48,16 @@ async def get_timeline(
             log.warning("dependent_not_found", dependent_id=dependent_id)
             raise HTTPException(status_code=404, detail="Dependent not found")
 
-        # Ensure schedule exists, generate if not
-        events = await generate_and_save_schedule(dep, session)
-        if not events:
-            # Fetch existing if already generated
-            events = await refresh_event_statuses(dependent_id, session)
-        else:
-            events = await refresh_event_statuses(dependent_id, session)
+        # Ensure schedule exists, generate based on type
+        if dep.type == DependentType.child:
+            await generate_and_save_schedule(dep, session)
+            await generate_growth_check_schedule(dep, session)
+        elif dep.type == DependentType.pregnant:
+            # For pregnant, we use DOB field as LMP proxy if not already set
+            await generate_pregnancy_schedule(dep, dep.date_of_birth, session)
+
+        # Always refresh statuses to keep due/overdue flags accurate
+        events = await refresh_event_statuses(dependent_id, session)
 
         # Apply category filter if provided
         if category:

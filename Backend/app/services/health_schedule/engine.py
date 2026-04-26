@@ -36,11 +36,17 @@ _growth_data: dict[str, Any] | None = None
 def _load_pregnancy_schedule() -> dict[str, Any]:
     global _pregnancy_data
     if _pregnancy_data is None:
-        path = Path(__file__).parent.parent.parent / "data" / "pregnancy_schedule.json"
+        # Move up 3 levels from app/services/health_schedule/engine.py to reach root, then data/
+        path = Path(__file__).parent.parent.parent.parent / "data" / "pregnancy_schedule.json"
         if path.exists():
             _pregnancy_data = json.loads(path.read_text())
         else:
-            _pregnancy_data = {"events": []}
+            # Try fallback for different execution contexts
+            fallback = Path("data/pregnancy_schedule.json")
+            if fallback.exists():
+                _pregnancy_data = json.loads(fallback.read_text())
+            else:
+                _pregnancy_data = {"events": []}
     return _pregnancy_data
 
 
