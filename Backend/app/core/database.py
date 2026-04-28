@@ -10,15 +10,18 @@ settings = get_settings()
 
 url = settings.database_url
 if url:
-    # asyncpg requires postgresql+asyncpg:// or just postgresql://
-    # If it starts with postgres://, we change it to postgresql://
+    # Standardize URL for asyncpg
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql://", 1)
     
-    # Remove sslmode param if present as we handle it in connect_args
-    if "sslmode" in url:
-        import re
-        url = re.sub(r"[\?&]sslmode=[^&]+", "", url)
+    # Remove any existing sslmode query params (we handle it in connect_args)
+    if "?" in url:
+        base_url, query = url.split("?", 1)
+        import urllib.parse
+        params = urllib.parse.parse_qs(query)
+        params.pop("sslmode", None)
+        new_query = urllib.parse.urlencode(params, doseq=True)
+        url = f"{base_url}?{new_query}" if new_query else base_url
 
 engine_kwargs = {
     "echo": settings.is_dev,
