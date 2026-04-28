@@ -9,6 +9,7 @@ from alembic import context
 
 from app.core.config import get_settings
 from sqlmodel import SQLModel
+from app import models  # noqa: F401
 
 config = context.config
 
@@ -50,11 +51,18 @@ async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
 
+    settings = get_settings()
+    url = get_url()
+    
+    connect_args = {}
+    if not url.startswith("sqlite"):
+        connect_args["ssl"] = "require"
+
     connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        connect_args={"ssl": "require"},
+        connect_args=connect_args,
     )
 
     async with connectable.connect() as connection:

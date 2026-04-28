@@ -27,6 +27,8 @@ cd Backend
 uv sync              # install deps
 uv sync --extra dev # install + dev deps (pytest, ruff)
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
+alembic revision --autogenerate -m "description" # create migration
+alembic upgrade head # run migrations
 ruff check .        # lint
 ruff check . --fix # lint + format
 pytest tests/       # run tests (29/29 passing)
@@ -104,6 +106,7 @@ cp .env.example .env
 - ✅ Gemini Live API voice for all languages (English, Hindi, Marathi, etc.)
 - ✅ Voice FAB using Gemini Live
 - ✅ Settings page simplified - no premium mode modal
+- ✅ Alembic migrations configured (async-ready)
 
 ### Stack Changes (Approved)
 
@@ -116,6 +119,5 @@ cp .env.example .env
 
 ### Pending
 
-- Alembic migrations
 - Frontend integration (complete)
 - Offline PWA (Phase 4)

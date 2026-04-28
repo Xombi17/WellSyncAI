@@ -30,20 +30,16 @@ AsyncSessionLocal = None
 if url:
     if url.startswith("sqlite"):
         pass
-    else:
-        # Supabase and other managed DBs usually require SSL
-        # asyncpg prefers ssl=True or an SSLContext
+    if not url.startswith("sqlite"):
+        from sqlalchemy.pool import NullPool
+        # Use NullPool in production/serverless to avoid "Cannot assign requested address"
+        if not settings.is_dev:
+            engine_kwargs["poolclass"] = NullPool
+        
         engine_kwargs.update({
-            "pool_pre_ping": True,
-            "pool_size": 2,  # Reduced for serverless to avoid exhaustion
-            "max_overflow": 5,
             "connect_args": {
                 "ssl": True,
-                "command_timeout": 60,
-                "server_settings": {
-                    "jit": "off",
-                    "response_encoding": "utf8",
-                }
+                "command_timeout": 30,
             }
         })
 
