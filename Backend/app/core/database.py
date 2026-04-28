@@ -9,8 +9,16 @@ from app.core.config import get_settings
 settings = get_settings()
 
 url = settings.database_url
-if url and "sslmode" in url:
-    url = url.replace("?sslmode=require", "").rstrip("?").rstrip("&")
+if url:
+    # asyncpg requires postgresql+asyncpg:// or just postgresql://
+    # If it starts with postgres://, we change it to postgresql://
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    
+    # Remove sslmode param if present as we handle it in connect_args
+    if "sslmode" in url:
+        import re
+        url = re.sub(r"[\?&]sslmode=[^&]+", "", url)
 
 engine_kwargs = {
     "echo": settings.is_dev,
@@ -23,14 +31,19 @@ if url:
     if url.startswith("sqlite"):
         pass
     else:
+        # Supabase and other managed DBs usually require SSL
+        # asyncpg prefers ssl=True or an SSLContext
         engine_kwargs.update({
             "pool_pre_ping": True,
-            "pool_size": 5,
-            "max_overflow": 10,
+            "pool_size": 2,  # Reduced for serverless to avoid exhaustion
+            "max_overflow": 5,
             "connect_args": {
-                "ssl": "require",
+                "ssl": True,
                 "command_timeout": 60,
-                "statement_cache_size": 0,
+                "server_settings": {
+                    "jit": "off",
+                    "response_encoding": "utf8",
+                }
             }
         })
 

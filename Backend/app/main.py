@@ -33,8 +33,12 @@ async def lifespan(app: FastAPI):
         log.error("startup_health_check_failed", health=health)
         log.warning("Continuing startup despite health check failures.")
 
-    # Database initialization and migration
-    await create_db_and_tables()
+    # Database initialization and migration (only in development)
+    if settings.is_dev:
+        log.info("initializing_database_dev")
+        await create_db_and_tables()
+    else:
+        log.info("skipping_database_init_prod")
 
     yield
 
