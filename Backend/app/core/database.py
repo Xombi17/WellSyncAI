@@ -44,6 +44,10 @@ if url:
 
 async def create_db_and_tables() -> None:
     """Create all tables (called at app startup in dev). Use Alembic for production migrations."""
+    if engine is None:
+        print("Database engine not initialized. Skipping table creation.")
+        return
+
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

@@ -78,17 +78,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     error_msg = str(exc)
     stack_trace = traceback.format_exc()
     
-    # Log to file for "black box" debugging
-    try:
-        with open("crash_report.log", "a") as f:
-            f.write(f"\n--- {datetime.now()} ---\n")
-            f.write(f"Path: {request.url.path}\n")
-            f.write(f"Error: {error_msg}\n")
-            f.write(f"Stack Trace:\n{stack_trace}\n")
-    except Exception as e:
-        log.error("failed_to_write_crash_log", error=str(e))
-        pass
-
     log.error("unhandled_exception", path=request.url.path, error=error_msg, exc_info=True)
     return JSONResponse(
         status_code=500,
