@@ -31,17 +31,29 @@ engine = None
 AsyncSessionLocal = None
 
 if url:
-    if url.startswith("sqlite"):
-        pass
     if not url.startswith("sqlite"):
         from sqlalchemy.pool import NullPool
         # Force NullPool in production to avoid "Cannot assign requested address"
         if not settings.is_dev:
             engine_kwargs["poolclass"] = NullPool
-        
+
+        # Force IPv4 to avoid Vercel/asyncpg Errno 99
+        import socket
+        from urllib.parse import urlparse
+        parsed = urlparse(url)
+        original_host = parsed.hostname
+        if original_host and not original_host.replace('.', '').isdigit():
+            try:
+                ipv4_host = socket.gethostbyname(original_host)
+                url = url.replace(original_host, ipv4_host, 1)
+                print(f"Forcing IPv4 for {original_host} -> {ipv4_host[:3]}***")
+            except Exception as e:
+                print(f"IPv4 resolution failed for {original_host}: {e}")
+
         # asyncpg specific connection args
         engine_kwargs["connect_args"] = {
             "ssl": True,
+            "server_hostname": original_host, # Required for SSL if using IP in URL
             "command_timeout": 30,
             "server_settings": {
                 "search_path": "public",
@@ -55,6 +67,28 @@ if url:
         class_=AsyncSession,
         expire_on_commit=False,
     )
+
+async def test_db_connection():
+    """Test the database connection and log status."""
+    if engine is None:
+        return False
+    
+    import asyncio
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+                return True
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait_time = (attempt + 1) * 2
+                print(f"DB connection attempt {attempt + 1} failed: {e}. Retrying in {wait_time}s...")
+                await asyncio.sleep(wait_time)
+            else:
+                print(f"DB connection failed after {max_retries} attempts: {e}")
+                return False
+    return False
 
 
 async def create_db_and_tables() -> None:

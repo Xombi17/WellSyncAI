@@ -10,6 +10,20 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+# Disable uvloop in production if present to avoid Errno 99 on Vercel
+import os
+if os.environ.get("VERCEL") == "1":
+    try:
+        import uvloop
+        # We can't easily uninstall it at runtime, but we can try to prevent 
+        # uvicorn from using it if we were starting it manually.
+        # Since Vercel starts it, we'll log it and hope the connection pool fix handles it.
+        # However, we can also try to force standard asyncio loop if possible.
+        import asyncio
+        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+    except ImportError:
+        pass
+
 from app.api.v1.router import router as v1_router
 from app.core.config import get_settings
 from app.core.database import create_db_and_tables
@@ -33,12 +47,18 @@ async def lifespan(app: FastAPI):
         log.error("startup_health_check_failed", health=health)
         log.warning("Continuing startup despite health check failures.")
 
-    # Database initialization and migration (only in development)
+    # Database initialization and migration
     if settings.is_dev:
         log.info("initializing_database_dev")
         await create_db_and_tables()
     else:
-        log.info("skipping_database_init_prod")
+        log.info("testing_database_connection_prod")
+        from app.core.database import test_db_connection
+        connected = await test_db_connection()
+        if connected:
+            log.info("database_connection_ok")
+        else:
+            log.error("database_connection_failed")
 
     yield
 
