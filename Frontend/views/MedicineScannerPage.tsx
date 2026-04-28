@@ -9,7 +9,6 @@ import { Camera, Upload, Sparkles, Pill, ArrowLeft, Loader2, CheckCircle2 } from
 export default function MedicineScannerPage() {
   const router = useRouter();
   const { data: dependents } = useDependents();
-  const { isDemoMode } = useAuthStore();
   const scanMutation = useScanMedicine();
   const createMutation = useCreateMedicine();
   const [scanning, setScanning] = useState(false);
@@ -27,17 +26,7 @@ export default function MedicineScannerPage() {
   }
 
   const handleScan = async (file?: File) => {
-    if (isDemoMode || !file) {
-      // Demo mode: simulate scan
-      setScanning(true);
-      setTimeout(() => {
-        setName('Amoxicillin 250mg');
-        setDosage('5ml syrup');
-        setFrequency('Three times daily for 5 days');
-        setSafety('caution');
-        setScanning(false);
-        setScanned(true);
-      }, 2500);
+    if (!file) {
       return;
     }
     setScanning(true);
@@ -74,10 +63,6 @@ export default function MedicineScannerPage() {
   const handleAdd = () => {
     if (!name) return;
     const depTarget = forDep || deps[0]?.id || '';
-    if (isDemoMode) {
-      router.push('/medicines');
-      return;
-    }
     createMutation.mutate({
       depId: depTarget,
       data: {

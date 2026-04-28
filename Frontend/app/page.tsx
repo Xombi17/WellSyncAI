@@ -1,8 +1,8 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import {
@@ -63,10 +63,12 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           <div className="flex items-center gap-2.5">
-            <img
+            <Image
               src="/images/logo-icon.png"
-              alt=""
-              className="w-8 h-8 rounded-lg"
+              alt="Vaxi Babu Logo"
+              width={32}
+              height={32}
+              className="rounded-lg"
             />
             <span className="font-heading font-800 text-lg text-white">
               Vaxi<span className="text-teal-400">Babu</span>
@@ -220,10 +222,12 @@ export default function LandingPage() {
                   <div className="bg-surface-900 rounded-[2rem] overflow-hidden">
                     <div className="px-5 pt-5 pb-4">
                       <div className="flex items-center gap-2 mb-4">
-                        <img
+                        <Image
                           src="/images/logo-icon.png"
-                          alt=""
-                          className="w-6 h-6 rounded-lg"
+                          alt="Vaxi Babu Logo"
+                          width={24}
+                          height={24}
+                          className="rounded-lg"
                         />
                         <span className="font-heading font-700 text-xs text-white">
                           Vaxi Babu
@@ -578,10 +582,12 @@ export default function LandingPage() {
       <footer className="border-t border-white/[0.04] py-8">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img
+            <Image
               src="/images/logo-icon.png"
-              alt=""
-              className="w-6 h-6 rounded-lg"
+              alt="Vaxi Babu Logo"
+              width={24}
+              height={24}
+              className="rounded-lg"
             />
             <span className="font-heading font-700 text-sm text-white">
               Vaxi Babu

@@ -104,3 +104,8 @@ Android/*
 /Android/
 
 Backend/.codex
+
+# Graphify
+graphify-out/
+.graphify_*
+

@@ -56,8 +56,10 @@ export function useIsAuthenticated() {
     const { isAuthenticated, token } = getAuthState();
 
     if (token && isTokenExpired(token)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthed(false);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthed(isAuthenticated);
     }
 

@@ -25,8 +25,8 @@ if url:
     else:
         engine_kwargs.update({
             "pool_pre_ping": True,
-            "pool_size": 1,
-            "max_overflow": 0,
+            "pool_size": 5,
+            "max_overflow": 10,
             "connect_args": {
                 "ssl": "require",
                 "command_timeout": 60,

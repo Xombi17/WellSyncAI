@@ -9,7 +9,6 @@ import { Bell, CheckCircle2, Circle, Volume2, Plus, X } from 'lucide-react';
 export default function RemindersPage() {
   const { data: remindersData, isLoading } = useReminders();
   const { data: dependentsData } = useDependents();
-  const { isDemoMode } = useAuthStore();
   const toggleMutation = useToggleReminder();
   const createMutation = useCreateReminder();
   const [filter, setFilter] = useState<'all' | 'pending' | 'done'>('all');

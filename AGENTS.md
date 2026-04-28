@@ -9,11 +9,13 @@ Before any work, read `PRD.md` — it's the single source of truth. All agents m
 ```
 Vaxi BabuAI/
 ├── Backend/          # FastAPI + Python 3.11+ (OWNED: primary dev)
-├── Frontend/        # Next.js 16 (in progress)
-├── .agents/         # Agent-specific context and memory
-├── .planning/       # Planning docs and research
-├── PRD.md          # Product requirements
-└── README.md      # Setup docs
+├── Frontend/         # Next.js 15.5.15 (Web/PWA)
+├── Mobile/           # Flutter (iOS/Android - ACTIVE)
+├── Android/          # Native Android (LEGACY: DEPRECATED)
+├── .agents/          # Agent-specific context and memory
+├── .planning/        # Planning docs and research
+├── PRD.md            # Product requirements
+└── README.md         # Setup docs
 ```
 
 ## Developer Commands
@@ -30,13 +32,22 @@ ruff check . --fix # lint + format
 pytest tests/       # run tests (29/29 passing)
 ```
 
-### Frontend (Next.js 16)
+### Frontend (Next.js 15.5.15)
 
 ```bash
 cd Frontend
 npm install
 npm run dev
 npm run build        # production build
+```
+
+### Mobile (Flutter)
+
+```bash
+cd Mobile
+flutter pub get
+flutter run
+flutter build apk    # for android
 ```
 
 ### Environment
@@ -101,6 +112,7 @@ cp .env.example .env
 - **Fixed Neon SSL** — removed `sslmode=require&channel_binding=require` from DATABASE_URL
 - **Replaced Vapi and ElevenLabs with Gemini Live** for all languages
 - **Removed all Vapi/11Labs/ElevenLabs references** from frontend and backend
+- **Switched Mobile Strategy**: Native Android (`Android/`) is deprecated. Active development is now in Flutter (`Mobile/`).
 
 ### Pending
 

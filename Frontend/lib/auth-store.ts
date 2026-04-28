@@ -9,14 +9,12 @@ interface AuthState {
   userId: string | null;
   householdId: string | null;
   isLoggedIn: boolean;
-  isDemoMode: boolean;
   language: Language;
   voiceEnabled: boolean;
   notificationsEnabled: boolean;
   voiceFabOpen: boolean;
   sidebarOpen: boolean;
   loginWithToken: (token: string, userId: string, householdId: string, familyName?: string) => void;
-  loginDemo: (familyId: string) => void;
   logout: () => void;
   hydrateFromLocalAuth: () => void;
   setLanguage: (lang: Language) => void;
@@ -33,7 +31,6 @@ export const useAuthStore = create<AuthState>()(
       userId: null,
       householdId: null,
       isLoggedIn: false,
-      isDemoMode: false,
       language: 'English',
       voiceEnabled: true,
       notificationsEnabled: true,
@@ -42,19 +39,7 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithToken: (token, userId, householdId, familyName) => {
         setAuthTokens(token, householdId, familyName);
-        set({ token, userId, householdId, isLoggedIn: true, isDemoMode: false });
-      },
-
-      loginDemo: (familyId) => {
-        var demoToken = `demo_${familyId}`;
-        setAuthTokens(demoToken, familyId, `${familyId} Family`);
-        set({
-          token: demoToken,
-          userId: `demo_user_${familyId}`,
-          householdId: familyId,
-          isLoggedIn: true,
-          isDemoMode: true,
-        });
+        set({ token, userId, householdId, isLoggedIn: true });
       },
 
       logout: () => {
@@ -64,7 +49,6 @@ export const useAuthStore = create<AuthState>()(
           userId: null,
           householdId: null,
           isLoggedIn: false,
-          isDemoMode: false,
         });
       },
 
@@ -75,7 +59,6 @@ export const useAuthStore = create<AuthState>()(
           userId: auth.householdId,
           householdId: auth.householdId,
           isLoggedIn: auth.isAuthenticated,
-          isDemoMode: auth.token?.startsWith('demo_') || false,
         });
       },
 
@@ -92,7 +75,6 @@ export const useAuthStore = create<AuthState>()(
         userId: state.userId,
         householdId: state.householdId,
         isLoggedIn: state.isLoggedIn,
-        isDemoMode: state.isDemoMode,
         language: state.language,
         voiceEnabled: state.voiceEnabled,
         notificationsEnabled: state.notificationsEnabled,

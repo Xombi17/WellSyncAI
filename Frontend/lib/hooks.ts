@@ -20,12 +20,6 @@ import {
   type Household,
 } from './api';
 import { useAuthStore } from './auth-store';
-import { demoFamilies } from './data';
-
-function getDemoFamily() {
-  var hid = useAuthStore.getState().householdId;
-  return demoFamilies.find((f: any) => f.id === hid) || demoFamilies[0];
-}
 
 function mapTypeToRelation(type: string) {
   if (type === 'child') return 'child';
@@ -42,17 +36,11 @@ function avatarForRelation(relation: string) {
 }
 
 export function useHousehold() {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useQuery({
     queryKey: ['household', householdId],
     queryFn: async () => {
-      if (isDemoMode) {
-        var fam = getDemoFamily();
-        return { id: fam.id, family_name: fam.name, language: fam.language } as any;
-      }
-
       if (householdId) {
         try {
           return (await getHousehold(householdId)) as any;
@@ -64,48 +52,29 @@ export function useHousehold() {
       var households = await getHouseholds();
       return (households[0] as any) || null;
     },
-    enabled: !!householdId || isDemoMode,
+    enabled: !!householdId,
   });
 }
 
 export function useSchemes() {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useQuery({
     queryKey: ['schemes', householdId],
     queryFn: async () => {
-      if (isDemoMode) {
-        return getDemoFamily().schemes || [];
-      }
-      if (!householdId) return [];
+      if (!householdId) return [] as any[];
       return getRecommendedSchemes(householdId) || null;
     },
-    enabled: !!householdId || isDemoMode,
+    enabled: !!householdId,
   });
 }
 
 export function useDependents() {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useQuery({
     queryKey: ['dependents', householdId],
     queryFn: async () => {
-      if (isDemoMode) {
-        return getDemoFamily().dependents.map((d: any) => ({
-          id: d.id,
-          name: d.name,
-          relation: d.relation,
-          dob: d.dob,
-          gender: d.gender,
-          avatar: d.avatar,
-          pregnancy_week: d.pregnancyWeek,
-          edd: d.edd,
-          high_risk_flags: d.highRiskFlags,
-        }));
-      }
-
       var deps = await getDependents(householdId || undefined);
       return deps.map((d: Dependent) => ({
         id: d.id,
@@ -125,22 +94,10 @@ export function useDependents() {
 
 export function useCreateDependent() {
   var qc = useQueryClient();
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useMutation({
     mutationFn: async (data: { name: string; relation: string; dob: string; gender: string }) => {
-      if (isDemoMode) {
-        return {
-          id: `dep_${Date.now()}`,
-          name: data.name,
-          relation: data.relation,
-          dob: data.dob,
-          gender: data.gender,
-          avatar: avatarForRelation(data.relation),
-        };
-      }
-
       return createDependent({
         household_id: householdId || '',
         name: data.name,
@@ -168,26 +125,11 @@ function mapEventTitle(e: HealthEvent) {
 }
 
 export function useTimeline(depId: string | undefined) {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
-
   return useQuery({
     queryKey: ['timeline', depId],
     enabled: !!depId,
     queryFn: async () => {
-      if (!depId) return [];
-      if (isDemoMode) {
-        var dep = getDemoFamily().dependents.find((d: any) => d.id === depId);
-        return (dep?.timeline || []).map((e: any) => ({
-          id: e.id,
-          title: e.title,
-          description: e.description,
-          date: e.date,
-          category: e.category,
-          status: e.status,
-          ai_explanation: e.aiExplanation,
-        }));
-      }
-
+      if (!depId) return [] as any[];
       var timeline = await getTimeline(depId);
       return (timeline.events || []).map((e: HealthEvent) => ({
         id: e.id,
@@ -203,30 +145,11 @@ export function useTimeline(depId: string | undefined) {
 }
 
 export function useAllTimelines() {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useQuery({
     queryKey: ['all-timelines', householdId],
     queryFn: async () => {
-      if (isDemoMode) {
-        var fam = getDemoFamily();
-        return fam.dependents.flatMap((d: any) =>
-          d.timeline.map((e: any) => ({
-            id: e.id,
-            title: e.title,
-            description: e.description,
-            date: e.date,
-            category: e.category,
-            status: e.status,
-            ai_explanation: e.aiExplanation,
-            dep_name: d.name,
-            dep_avatar: d.avatar,
-            dep_id: d.id,
-          }))
-        );
-      }
-
       var deps = await getDependents(householdId || undefined);
       var chunks = await Promise.all(
         deps.map(async (d: Dependent) => {
@@ -278,30 +201,11 @@ export function useCreateEvent() {
 }
 
 export function useMedicines(depId?: string) {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useQuery({
     queryKey: ['medicines', depId || 'all', householdId],
     queryFn: async () => {
-      if (isDemoMode) {
-        var meds = getDemoFamily().medicines || [];
-        var filtered = depId ? meds.filter((m: any) => m.forDependent === depId) : meds;
-        return filtered.map((m: any) => ({
-          id: m.id,
-          name: m.name,
-          dosage: m.dosage,
-          frequency: m.frequency,
-          for_dependent: m.forDependent,
-          safety: m.safety,
-          active: m.active,
-          start_date: m.startDate,
-          end_date: m.endDate,
-          doses_taken: m.dosesTaken,
-          total_doses: m.totalDoses,
-        }));
-      }
-
       var deps = await getDependents(householdId || undefined);
       var targetDeps = depId ? deps.filter((d) => d.id === depId) : deps;
       var chunks = await Promise.all(targetDeps.map((d) => getMedicineRegimens(d.id)));
@@ -359,52 +263,23 @@ export function useCreateMedicine() {
 }
 
 export function usePregnancy() {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   var householdId = useAuthStore((s) => s.householdId);
 
   return useQuery({
     queryKey: ['pregnancy', householdId],
     queryFn: async () => {
-      if (isDemoMode) {
-        var dep = getDemoFamily().dependents.find((d: any) => d.pregnancyWeek);
-        if (!dep) return null;
-        var week = dep.pregnancyWeek || 0;
-        return {
-          dependent_id: dep.id,
-          dependent_name: dep.name,
-          pregnancy_week: week,
-          edd: dep.edd || '',
-          trimester: week <= 12 ? 1 : week <= 27 ? 2 : 3,
-          high_risk_flags: dep.highRiskFlags || [],
-          milestones: [
-            { week: 8, label: 'First ultrasound', done: week >= 8 },
-            { week: 12, label: 'NT scan & blood tests', done: week >= 12 },
-            { week: 20, label: 'Detailed anatomy scan', done: week >= 20 },
-            { week: 24, label: 'Glucose tolerance test', done: week >= 24 },
-            { week: 28, label: 'Anti-D injection (if needed)', done: week >= 28 },
-            { week: 32, label: 'Growth scan', done: week >= 32 },
-            { week: 36, label: 'Weekly checkups begin', done: week >= 36 },
-            { week: 40, label: 'Expected delivery', done: week >= 40 },
-          ],
-        };
-      }
       if (!householdId) return null;
-      return null;
+      return null as any;
     },
   });
 }
 
 export function useGrowthRecords(depId: string | undefined) {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   return useQuery({
     queryKey: ['growth', depId],
     enabled: !!depId,
     queryFn: async () => {
-      if (!depId) return [];
-      if (isDemoMode) {
-        var dep = getDemoFamily().dependents.find((d: any) => d.id === depId);
-        return dep?.growthRecords || [];
-      }
+      if (!depId) return [] as any[];
       var records = await getGrowthRecords(depId);
       return records.map((r: any) => ({
         id: r.id,
@@ -432,22 +307,10 @@ export function useAddGrowthRecord() {
 }
 
 export function useReminders() {
-  var isDemoMode = useAuthStore((s) => s.isDemoMode);
   return useQuery({
     queryKey: ['reminders'],
     queryFn: async () => {
-      if (isDemoMode) {
-        return (getDemoFamily().reminders || []).map((r: any) => ({
-          id: r.id,
-          title: r.title,
-          description: r.description,
-          time: r.time,
-          for_dependent: r.forDependent,
-          done: r.done,
-          category: r.category,
-        }));
-      }
-      return [];
+      return [] as any[];
     },
   });
 }

@@ -2,6 +2,8 @@
 // Uses standard fetch (not axios) with typed responses
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import { supabase } from './supabase';
+
 
 // Types matching Backend SQLModel/Prisma schema
 export interface Household {
@@ -400,27 +402,41 @@ export async function createHealthEvent(dependentId: string, event: Partial<Heal
   });
 }
 
-import { supabase } from './supabase';
-
 export const authApi = {
   async login(emailOrUsername: string, password: string): Promise<{ access_token: string; token_type: string; household_id: string }> {
-    // If it's a simple username (no @), we might need to append the demo domain 
-    // or handle it according to how they were seeded.
     const email = emailOrUsername.includes('@') ? emailOrUsername : `${emailOrUsername}@Vaxi Babu.demo`;
-    
+
+    // Use Supabase for authentication
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      throw new ApiError(401, error.message);
+      throw new ApiError(400, error.message || 'Invalid email or password.');
     }
 
-    if (!data.session) {
-      throw new ApiError(401, 'Session not created');
+    if (!data.user || !data.session) {
+      throw new ApiError(400, 'Login failed. Please try again.');
     }
 
+    // Resolve household by calling /auth/sync to ensure household record exists
+    try {
+      const syncResponse = await fetch(`${API_URL}/api/v1/auth/sync`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${data.session.access_token}`,
+        },
+      });
+
+      if (!syncResponse.ok) {
+        console.warn('Sync failed, but proceeding with user ID as household ID');
+      }
+    } catch (e) {
+      console.warn('Could not sync household record:', e);
+    }
+
+    // Return Supabase user ID as both user ID and household ID
     return {
       access_token: data.session.access_token,
       token_type: 'bearer',

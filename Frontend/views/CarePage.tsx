@@ -1,14 +1,12 @@
 'use client';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../lib/auth-store';
-import { demoFamilies } from '../lib/data';
 import { MapPin, Phone, Clock, Building2, Stethoscope, Heart, ExternalLink } from 'lucide-react';
 
 export default function CarePage() {
-  const { householdId, isDemoMode } = useAuthStore();
+  const { householdId } = useAuthStore();
   // Health centers come from local data in demo, or could be a future API endpoint
-  const demoFamily = demoFamilies.find(f => f.id === householdId) ?? demoFamilies[0];
-  const healthCenters = demoFamily.healthCenters;
+  const healthCenters: any[] = [];
 
   const typeConfig = (t: string) => {
     if (t === 'PHC') return { icon: Building2, color: 'teal', label: 'Primary Health Center' };
@@ -33,7 +31,7 @@ export default function CarePage() {
           <h2 className="font-heading font-700 text-sm text-coral-400 mb-3 flex items-center gap-2">
             <Heart size={14} /> SOS ASHA Access
           </h2>
-          {ashaWorkers.map((asha, i) => (
+          {ashaWorkers.map((asha: any, i: number) => (
             <div key={asha.id} className="bg-coral-500/[0.06] border border-coral-500/15 rounded-2xl p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
@@ -48,7 +46,7 @@ export default function CarePage() {
                       {asha.openNow && <span className="text-xs text-teal-400 flex items-center gap-1"><Clock size={10} /> Available Now</span>}
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {asha.specialties.map(s => (
+                      {asha.specialties.map((s: string) => (
                         <span key={s} className="text-[10px] px-2 py-0.5 bg-white/[0.04] border border-white/[0.06] rounded-full text-white/40">{s}</span>
                       ))}
                     </div>
@@ -69,7 +67,7 @@ export default function CarePage() {
           <Building2 size={14} className="text-teal-400" /> Health Centers & Clinics
         </h2>
         <div className="space-y-4">
-          {facilities.map((center, i) => {
+          {facilities.map((center: any, i: number) => {
             const tc = typeConfig(center.type);
             return (
               <motion.div key={center.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05 }}
@@ -92,7 +90,7 @@ export default function CarePage() {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {center.specialties.map(s => (
+                        {center.specialties.map((s: string) => (
                           <span key={s} className="text-[10px] px-2 py-0.5 bg-white/[0.04] border border-white/[0.06] rounded-full text-white/40">{s}</span>
                         ))}
                       </div>

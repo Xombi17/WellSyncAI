@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/lib/auth-store';
@@ -52,7 +53,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <aside className="hidden lg:flex flex-col w-64 bg-surface-900/80 border-r border-white/[0.06] fixed inset-y-0 left-0 z-30">
         <div className="p-5 border-b border-white/[0.06]">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <img src="/images/logo-icon.png" alt="" className="w-8 h-8 rounded-lg" />
+            <Image src="/images/logo-icon.png" alt="Vaxi Babu Logo" width={32} height={32} className="rounded-lg" />
             <span className="font-heading font-800 text-lg text-white">
               Vaxi<span className="text-teal-400">Babu</span>
               <span className="text-teal-300 text-xs font-600 ml-0.5"></span>
@@ -100,8 +101,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <Menu size={20} />
           </button>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/images/logo-icon.png" alt="" className="w-7 h-7 rounded-lg" />
-            <span className="font-heading font-700 text-sm text-white">Well<span className="text-teal-400">Sync</span></span>
+            <Image src="/images/logo-icon.png" alt="Vaxi Babu Logo" width={28} height={28} className="rounded-lg" />
+            <span className="font-heading font-700 text-sm text-white">Vaxi<span className="text-teal-400">Babu</span></span>
           </Link>
           <div className="w-9" />
         </div>
@@ -113,7 +114,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 z-50 lg:hidden" onClick={() => setMobileNav(false)} />
             <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 left-0 w-72 bg-surface-900 z-50 lg:hidden border-r border-white/[0.06] flex flex-col">
               <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
-                <span className="font-heading font-700 text-white">Well<span className="text-teal-400">Sync</span> AI</span>
+                <span className="font-heading font-700 text-white">Vaxi<span className="text-teal-400">Babu</span></span>
                 <button onClick={() => setMobileNav(false)} className="p-1 text-white/40"><X size={20} /></button>
               </div>
               <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
