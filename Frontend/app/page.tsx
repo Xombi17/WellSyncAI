@@ -11,6 +11,7 @@ import LandingNav from "@/components/landing/LandingNav";
 import LandingFooter from "@/components/landing/LandingFooter";
 import FloatingElements from "@/components/landing/FloatingElements";
 import SplashScreen from "@/components/landing/SplashScreen";
+import HealthcareStickers from "@/components/landing/HealthcareStickers";
 
 export default function LandingPage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -20,6 +21,7 @@ export default function LandingPage() {
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       
       <div className={showSplash ? "opacity-0 invisible h-0 overflow-hidden" : "opacity-100 visible transition-opacity duration-1000"}>
+        <HealthcareStickers />
         {/* Floating medical background elements */}
         <FloatingElements />
         {/* Navigation */}
