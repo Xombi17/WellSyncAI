@@ -240,7 +240,7 @@ class _PregnancyScreenState extends ConsumerState<PregnancyScreen> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'Mark as completed when pregnancy has ended or update risk flags.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
@@ -337,7 +337,7 @@ class _PregnancyScreenState extends ConsumerState<PregnancyScreen> {
 }
 
 class InfoRow extends StatelessWidget {
-  const InfoRow({
+  InfoRow({
     super.key,
     required this.label,
     required this.value,
