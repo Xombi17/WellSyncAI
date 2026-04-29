@@ -6,6 +6,7 @@ import '../../../core/network/dio_provider.dart';
 import '../../../core/storage/shared_prefs_token_storage.dart';
 import '../../../core/storage/token_storage.dart';
 import '../domain/auth_session.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'models/auth_token_response.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -43,7 +44,7 @@ class AuthRepository {
     required String password,
   }) async {
     final response = await _apiClient.post<AuthTokenResponse>(
-      '/login',
+      ApiEndpoints.login,
       data: <String, dynamic>{
         'username': username,
         'password': password,

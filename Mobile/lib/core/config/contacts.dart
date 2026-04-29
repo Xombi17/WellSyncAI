@@ -31,24 +31,9 @@ class AppContacts {
   static const githubRepo = 'https://github.com/varad/Hackathons/WellSyncAI';
   static const projectLead = 'Varad Joshi';
 
-  // ===== API Endpoints =====
-  static const backendBaseUrl = 'http://localhost:8080';
-  static const apiBasePath = '/api/v1';
-  static const fullApiBase = '$backendBaseUrl$apiBasePath';
 
-  // ===== Key API Routes =====
-  static const householdsEndpoint = '$apiBasePath/households';
-  static const loginEndpoint = '$apiBasePath/auth/login';
-  static const pregnancyEndpoint = '$apiBasePath/pregnancy';
-  static const growthEndpoint = '$apiBasePath/growth';
-  static const dependentsEndpoint = '$apiBasePath/dependents';
-  static const timelineEndpoint = '$apiBasePath/timeline';
-  static const remindersEndpoint = '$apiBasePath/reminders';
-  static const voiceEndpoint = '$apiBasePath/voice';
 
-  // ===== Gemini AI (Voice Integration) =====
-  static const geminiApiBase = 'https://generativelanguage.googleapis.com';
-  static const geminiModel = 'gemini-2.0-flash-live-001';
+
 
   // ===== Database (Supabase/PostgreSQL) =====
   static const databaseHost = 'localhost';

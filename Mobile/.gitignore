@@ -20,3 +20,4 @@ ios/Flutter/flutter_export_environment.sh
 macos/Flutter/ephemeral/
 linux/flutter/ephemeral/
 windows/flutter/ephemeral/
+.dart_define/*.json

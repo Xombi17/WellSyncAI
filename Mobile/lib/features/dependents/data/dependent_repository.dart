@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'models/dependent.dart';
 
 final dependentRepositoryProvider = Provider<DependentRepository>(
@@ -17,7 +18,7 @@ class DependentRepository {
     String? householdId,
   }) async {
     return _apiClient.get<List<Dependent>>(
-      '/dependents',
+      ApiEndpoints.dependents,
       queryParameters: householdId == null || householdId.isEmpty
           ? null
           : {'household_id': householdId},

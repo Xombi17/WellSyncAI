@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'models/household.dart';
 import '../../onboarding/data/models/household_create.dart';
 
@@ -16,7 +17,7 @@ class HouseholdRepository {
 
   Future<List<Household>> fetchHouseholds() async {
     return _apiClient.get<List<Household>>(
-      '/households',
+      ApiEndpoints.households,
       decoder: (data) => (data as List<dynamic>)
           .map((item) => Household.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -25,7 +26,7 @@ class HouseholdRepository {
 
   Future<Household> createHousehold(HouseholdCreate householdData) async {
     return _apiClient.post<Household>(
-      '/households',
+      ApiEndpoints.households,
       data: householdData.toJson(),
       decoder: (data) => Household.fromJson(data as Map<String, dynamic>),
     );

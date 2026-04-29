@@ -7,6 +7,7 @@ import '../../../core/network/dio_provider.dart';
 import '../../../core/sync/offline_mutation.dart';
 import '../../../core/sync/offline_sync_manager.dart';
 import 'models/explain_event_response.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'models/timeline_event.dart';
 
 final timelineRepositoryProvider = Provider<TimelineRepository>(
@@ -31,7 +32,7 @@ class TimelineRepository {
     String? category,
   }) {
     return _apiClient.get<TimelineResponse>(
-      '/timeline/$dependentId',
+      '${ApiEndpoints.timeline}/$dependentId',
       queryParameters: category == null || category.isEmpty
           ? null
           : <String, dynamic>{'category': category},
@@ -46,13 +47,13 @@ class TimelineRepository {
     return _dispatchTimelineMutation<TimelineEvent>(
       mutation: OfflineMutation(
         id: 'timeline:$dependentId:$eventId:mark_given',
-        endpoint: '/api/v1/timeline/$dependentId/events/$eventId/mark-given',
+        endpoint: '/api/v1${ApiEndpoints.timeline}/$dependentId/events/$eventId/mark-given',
         method: 'POST',
         payload: const <String, dynamic>{},
         timestamp: DateTime.now().millisecondsSinceEpoch,
       ),
       onlineCall: () => _apiClient.post<TimelineEvent>(
-        '/timeline/$dependentId/events/$eventId/mark-given',
+        '${ApiEndpoints.timeline}/$dependentId/events/$eventId/mark-given',
         data: const <String, dynamic>{},
         decoder: (data) => TimelineEvent.fromJson(data as Map<String, dynamic>),
       ),
@@ -69,7 +70,7 @@ class TimelineRepository {
     return _dispatchTimelineMutation<TimelineEvent>(
       mutation: OfflineMutation(
         id: 'timeline:$dependentId:$eventId:verify',
-        endpoint: '/api/v1/timeline/$dependentId/events/$eventId/verify',
+        endpoint: '/api/v1${ApiEndpoints.timeline}/$dependentId/events/$eventId/verify',
         method: 'POST',
         payload: <String, dynamic>{
           'verified_by': verifiedBy,
@@ -79,7 +80,7 @@ class TimelineRepository {
         timestamp: DateTime.now().millisecondsSinceEpoch,
       ),
       onlineCall: () => _apiClient.post<TimelineEvent>(
-        '/timeline/$dependentId/events/$eventId/verify',
+        '${ApiEndpoints.timeline}/$dependentId/events/$eventId/verify',
         data: <String, dynamic>{
           'verified_by': verifiedBy,
           'verification_notes': verificationNotes,
@@ -95,7 +96,7 @@ class TimelineRepository {
     String language = 'en',
   }) {
     return _apiClient.post<ExplainEventResponse>(
-      '/ai/explain-event',
+      '${ApiEndpoints.ai}/explain-event',
       data: <String, dynamic>{
         'event_id': eventId,
         'language': language,

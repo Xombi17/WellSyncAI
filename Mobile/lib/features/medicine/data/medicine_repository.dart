@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/network/api_endpoints.dart';
 import '../data/models/medicine_safety_response.dart';
 
 final medicineRepositoryProvider = Provider<MedicineRepository>(
@@ -22,7 +23,7 @@ class MedicineRepository {
     String language = 'en',
   }) {
     return _apiClient.post<MedicineSafetyResponse>(
-      '/medicine/check-name',
+      '${ApiEndpoints.medicine}/check-name',
       data: <String, dynamic>{
         'medicine_name': medicineName,
         if (concern != null && concern.trim().isNotEmpty) 'concern': concern.trim(),
@@ -49,7 +50,7 @@ class MedicineRepository {
     );
 
     return _apiClient.upload<MedicineSafetyResponse>(
-      '/medicine/check-image',
+      '${ApiEndpoints.medicine}/check-image',
       data: formData,
       queryParameters: {
         'language': language,

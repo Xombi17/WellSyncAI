@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/network/api_endpoints.dart';
 import '../data/models/growth_record.dart';
 
 final growthRepositoryProvider = Provider<GrowthRepository>(
@@ -24,7 +25,7 @@ class GrowthRepository {
     String? notes,
   }) async {
     return _apiClient.post<GrowthRecord>(
-      '/growth/$dependentId',
+      '${ApiEndpoints.growth}/$dependentId',
       data: <String, dynamic>{
         'dependent_id': dependentId,
         'household_id': householdId,
@@ -42,7 +43,7 @@ class GrowthRepository {
 
   Future<List<GrowthRecord>> listGrowthRecords(String dependentId) async {
     return _apiClient.get<List<GrowthRecord>>(
-      '/growth/$dependentId',
+      '${ApiEndpoints.growth}/$dependentId',
       decoder: (data) => (data as List<dynamic>)
           .map((item) => GrowthRecord.fromJson(item as Map<String, dynamic>))
           .toList(),

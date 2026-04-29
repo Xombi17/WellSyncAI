@@ -18,7 +18,7 @@ class PregnancyRepository {
     required DateTime lmpDate,
   }) async {
     return _apiClient.post<PregnancyProfile>(
-      '/pregnancy',
+      ApiEndpoints.pregnancy,
       data: <String, dynamic>{
         'household_id': householdId,
         'lmp_date': lmpDate.toIso8601String(),
