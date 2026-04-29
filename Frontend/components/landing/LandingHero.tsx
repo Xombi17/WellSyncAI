@@ -75,6 +75,34 @@ export default function LandingHero() {
               </div>
             </motion.div>
 
+            {/* Data particles flowing around */}
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-cyan-400 rounded-full blur-[1px] z-0"
+                animate={{
+                  x: [
+                    Math.cos(i * 60 * Math.PI / 180) * 180,
+                    Math.cos((i * 60 + 120) * Math.PI / 180) * 200,
+                    Math.cos((i * 60 + 240) * Math.PI / 180) * 180,
+                    Math.cos(i * 60 * Math.PI / 180) * 180
+                  ],
+                  y: [
+                    Math.sin(i * 60 * Math.PI / 180) * 240,
+                    Math.sin((i * 60 + 120) * Math.PI / 180) * 260,
+                    Math.sin((i * 60 + 240) * Math.PI / 180) * 240,
+                    Math.sin(i * 60 * Math.PI / 180) * 240
+                  ],
+                  opacity: [0.2, 0.8, 0.2]
+                }}
+                transition={{
+                  duration: 8 + i,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+            ))}
+
             <motion.div className="absolute -bottom-2 right-4 z-10" animate={{ y: [5, -5, 5] }}
               transition={{ duration: 4.5, repeat: Infinity, delay: 1 }}>
               <div className="glass-strong rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">

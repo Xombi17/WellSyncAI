@@ -154,15 +154,15 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
           initial={{ opacity: 0, y: 20 }}
           animate={phase === "text" || phase === "done" ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="relative"
+          className="relative text-center"
         >
-          <h1 className="text-5xl sm:text-6xl font-[800] italic tracking-tight"
-            style={{ fontFamily: "'Plus Jakarta Sans', 'Georgia', serif" }}>
+          <h1 className="text-6xl sm:text-7xl font-bold italic tracking-tight"
+            style={{ fontFamily: "'Dancing Script', cursive" }}>
             {brandName.split("").map((char, i) => (
               <motion.span key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={phase === "text" || phase === "done" ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: i * 0.08, duration: 0.3, ease: "easeOut" }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={phase === "text" || phase === "done" ? { opacity: 1, scale: 1 } : {}}
+                transition={{ delay: i * 0.12, duration: 0.4, ease: "backOut" }}
                 className={i < 4 ? "text-white" : ""}
                 style={i >= 4 ? {
                   background: "linear-gradient(135deg, #06b6d4, #3b82f6)",
