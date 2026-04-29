@@ -234,3 +234,57 @@ async def detect_completion_intent(
     except Exception as exc:
         log.warning("intent_detection_failed", error=str(exc))
         return None
+
+
+async def classify_medicine_with_ai(
+    medicine_name: str,
+    concern: str | None = None,
+) -> tuple[str, str, str, str, float]:
+    """
+    Fallback classifier using LLM when deterministic rules fail.
+    Returns: (bucket, concern_checked, why_caution, next_step, confidence)
+    """
+    try:
+        client = get_ai_client()
+        system_prompt = (
+            "You are a medicine safety classifier. "
+            "Classify the given medicine into one of these buckets: "
+            "'common_use', 'use_with_caution', 'insufficient_info', 'consult_doctor_urgently'. "
+            "Return JSON in format: "
+            "{'bucket': string, 'concern': string, 'why_caution': string, 'next_step': string}. "
+            "IMPORTANT: Always include a disclaimer in 'why_caution' that this is an AI guess "
+            "and a doctor must be consulted."
+        )
+        user_message = f"Medicine: {medicine_name}\nConcern: {concern or 'general safety'}"
+
+        chat = await client.chat.completions.create(
+            model=settings.github_chat_model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=200,
+            temperature=0.2,
+        )
+        import json
+        data = json.loads(chat.choices[0].message.content)
+        
+        return (
+            data.get("bucket", "insufficient_info"),
+            data.get("concern", concern or "general safety"),
+            data.get("why_caution", "Consult a doctor for safety information."),
+            data.get("next_step", "Consult a doctor."),
+            0.50, # Low confidence for AI fallback
+        )
+
+    except Exception as exc:
+        log.warning("ai_medicine_classification_failed", error=str(exc))
+        return (
+            "insufficient_info",
+            concern or "general safety",
+            f"'{medicine_name}' is not in our current database. We cannot confirm its safety profile.",
+            "Please consult a pharmacist or doctor before using this medicine.",
+            0.30,
+        )
+

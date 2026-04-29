@@ -5,9 +5,11 @@ import { Mic, Square, Loader2, Volume2 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useGeminiVoiceBridge } from '@/lib/gemini-voice';
+import { useAuthStore } from '@/lib/auth-store';
 
 export function VoiceFAB() {
   const params = useParams();
+  const language = useAuthStore((s) => s.language);
   const dependentId = params && typeof params === 'object' && 'dependent_id' in params
     ? (params.dependent_id as string)
     : '';
@@ -59,7 +61,7 @@ export function VoiceFAB() {
         return;
       }
 
-      await connect('English', householdId, dependentId);
+      await connect(language, householdId, dependentId);
     } catch (error: any) {
       console.error('Failed to start voice call:', error);
       setTransientError(error?.message || 'Failed to start voice call');

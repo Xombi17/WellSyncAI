@@ -6,7 +6,7 @@ import { StatSkeleton, CardSkeleton } from '../components/LoadingSkeleton';
 import ErrorState from '../components/ErrorState';
 import {
   CalendarClock, AlertTriangle, CheckCircle2, Clock, ChevronRight,
-  Pill, Heart, Baby, Bell, MapPin, Sparkles, ArrowUpRight
+  Pill, Heart, Baby, Bell, MapPin, Sparkles, ArrowUpRight, ScanLine
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -162,6 +162,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: 'Medicines', icon: Pill, path: '/medicines', color: 'teal' },
+              { label: 'Scan Meds', icon: ScanLine, path: '/scan', color: 'blue' },
               { label: 'Nearby Care', icon: MapPin, path: '/care', color: 'coral' },
               { label: 'Growth', icon: Baby, path: '/growth', color: 'sage' },
               { label: 'Pregnancy', icon: Heart, path: '/pregnancy', color: 'warm' },

@@ -30,6 +30,8 @@
 	<string>Vaxi Babu needs camera access to capture medicine packaging for safety checks.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Vaxi Babu needs photo library access to upload medicine images for safety checks.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Vaxi Babu needs microphone access for voice-first health memory interactions with Gemini Live.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

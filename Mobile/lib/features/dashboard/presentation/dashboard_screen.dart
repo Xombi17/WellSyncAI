@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../navigation/presentation/voice_fab.dart';
 import '../application/dashboard_overview_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -17,11 +18,7 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Vaxi Babu'),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: null,
-        icon: const Icon(Icons.mic_none_rounded),
-        label: const Text('Voice assistant'),
-      ),
+      floatingActionButton: const VoiceFAB(),
       body: RefreshIndicator(
         onRefresh: () async => ref.refresh(dashboardOverviewProvider.future),
         child: dashboardValue.when(

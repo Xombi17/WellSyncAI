@@ -37,7 +37,7 @@ def get_tips_for_age(age_months: int, language: str = "en") -> list[dict[str, An
                         "category": tip.get("category"),
                         "title": tip.get("title"),
                         "content": tip.get("content"),
-                        "content_hi": tip.get("hinodi"),
+                        "content_hi": tip.get("hindi"),
                     }
                 )
             return result

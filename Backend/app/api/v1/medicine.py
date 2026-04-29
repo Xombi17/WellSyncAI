@@ -9,7 +9,7 @@ import structlog
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.schemas.medicine import MedicineSafetyRequest, MedicineSafetyResponse
-from app.services.ai_service import simplify_medicine_result
+from app.services.ai_service import simplify_medicine_result, classify_medicine_with_ai
 from app.services.medicine_safety import classify_medicine
 from app.services.ocr_service import extract_text_from_image
 
@@ -79,6 +79,10 @@ async def check_medicine_from_image(
 
     # Step 3: Classify
     bucket, concern_checked, why_caution, next_step, confidence = classify_medicine(medicine_name, concern)
+    
+    if bucket == "insufficient_info":
+        log.info("using_ai_fallback_for_medicine", medicine_name=medicine_name)
+        bucket, concern_checked, why_caution, next_step, confidence = await classify_medicine_with_ai(medicine_name, concern)
 
     # Step 4: AI simplification (optional, non-blocking)
     try:
@@ -108,6 +112,10 @@ async def check_medicine_by_name(
     Useful when the frontend already knows the medicine name.
     """
     bucket, concern_checked, why_caution, next_step, confidence = classify_medicine(body.medicine_name, body.concern)
+    
+    if bucket == "insufficient_info":
+        log.info("using_ai_fallback_for_medicine_name", medicine_name=body.medicine_name)
+        bucket, concern_checked, why_caution, next_step, confidence = await classify_medicine_with_ai(body.medicine_name, body.concern)
 
     try:
         simplified_why = await simplify_medicine_result(body.medicine_name, bucket, why_caution, language)
