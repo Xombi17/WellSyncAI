@@ -436,3 +436,58 @@ async def get_conversation_context(
         "turns": recent,
         "summary": f"Found {len(recent)} recent messages from your last conversation.",
     }
+
+
+@router.post("/tools/log-chw-visit-report")
+async def log_chw_visit_report(
+    request: Request,
+    current_household: Household = Depends(get_current_household),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    """
+    CHW Tool — Allows a health worker to narrate a visit report.
+    Gemini Live calls this with the narrated text.
+    """
+    if current_household.user_type not in (UserType.asha, UserType.anganwadi, UserType.health_worker, UserType.family):
+        # We allow family for testing if needed, but strictly it's for CHW
+        pass
+
+    try:
+        payload = await request.json()
+    except Exception:
+        return {"error": "Invalid JSON"}
+
+    voice_note = payload.get("visit_note", "")
+    household_name = payload.get("household_name", "")
+    language = payload.get("language", "en")
+
+    if not voice_note:
+        return {"error": "visit_note is required"}
+
+    try:
+        from app.services.ai_service import answer_voice_question
+        
+        prompt = f"""Structure this CHW visit note into JSON.
+Worker: {current_household.name}
+Household: {household_name or 'Unknown'}
+Note: {voice_note}
+
+Fields: members_seen (list), vaccinations_given (list), observations (text), flag_urgent (bool)."""
+        
+        structured_json = await answer_voice_question(prompt, "", language)
+        
+        # Log this turn into memory for context
+        _conversation_memory[current_household.id].append({
+            "role": "assistant",
+            "content": f"Logged visit report for {household_name or 'household'}: {voice_note}",
+            "timestamp": datetime.now().isoformat()
+        })
+
+        return {
+            "success": True,
+            "report_summary": structured_json,
+            "message": f"Visit report for {household_name or 'the family'} has been recorded and structured."
+        }
+    except Exception as e:
+        log.error("chw_voice_report_failed", error=str(e))
+        return {"error": "Failed to structure the voice report."}

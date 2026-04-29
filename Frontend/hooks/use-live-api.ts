@@ -132,6 +132,21 @@ const saveConversationTurnDeclaration: FunctionDeclaration = {
   },
 };
 
+const logChwVisitReportDeclaration: FunctionDeclaration = {
+  name: "log_chw_visit_report",
+  description:
+    "ONLY for health workers (CHW/ASHA). Records a visit narration and structures it into a field report. Use when the user says they visited a family and describes what happened (vaccines given, observations). Extract household_name and the visit_note.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      household_name: { type: Type.STRING, description: "Name of the household visited." },
+      visit_note: { type: Type.STRING, description: "The narrated visit details." },
+      language: { type: Type.STRING, description: "Language code for the response (en, hi, mr, etc.)." },
+    },
+    required: ["visit_note"],
+  },
+};
+
 export function useLiveAPI() {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -338,7 +353,13 @@ export function useLiveAPI() {
 - Use short, clear sentences.
 - Before calling a tool, say what you are doing (e.g., "Let me check today's priorities for your family.").
 - Be calm, empathetic, and encouraging.
-- Never read UUIDs or technical identifiers aloud.`;
+- Never read UUIDs or technical identifiers aloud.
+
+## CHW / ASHA Mode (NEW)
+- If the user identifies as a health worker or says they are on a field visit → prioritize log_chw_visit_report.
+- When they say "I visited the [Name] family" or "Log a visit for [Name]", extract the family name and then listen for their narration.
+- If they just start narrating, call log_chw_visit_report with the narration.
+- After logging, summarize the structured report results to them: "Got it. I've logged that Baby [Name] received their Vitamin A shot and your observations about [X]."`;
 
         // Initialize Audio Context for playback
         let audioCtx: AudioContext;
@@ -621,6 +642,18 @@ export function useLiveAPI() {
                           const data = await res.json();
                           return { id: call.id, name: call.name, response: data };
                         }
+
+                        // CHW — Log visit report
+                        if (call.name === "log_chw_visit_report") {
+                          const args = call.args as { household_name?: string; visit_note: string; language?: string };
+                          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/v1/voice/tools/log-chw-visit-report`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                            body: JSON.stringify({ ...args, language: args.language || language }),
+                          });
+                          const data = await res.json();
+                          return { id: call.id, name: call.name, response: data };
+                        }
                       } catch (err) {
                         return {
                           id: call.id,
@@ -698,6 +731,7 @@ export function useLiveAPI() {
                   checkMedicineByVoiceDeclaration,
                   getConversationContextDeclaration,
                   saveConversationTurnDeclaration,
+                  logChwVisitReportDeclaration,
                 ],
               },
             ],
