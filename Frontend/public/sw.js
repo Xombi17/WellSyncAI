@@ -112,8 +112,8 @@ async function staleWhileRevalidate(request) {
   const fetchPromise = fetch(request)
     .then((response) => {
       if (response.ok) {
-        const cache = caches.open(DYNAMIC_CACHE);
-        cache.then((c) => c.put(request, response.clone()));
+        const responseForCache = response.clone();
+        caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseForCache));
       }
       return response;
     })
@@ -148,4 +148,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-

@@ -1,7 +1,7 @@
 // API client library - connects Frontend to Backend API
 // Uses standard fetch (not axios) with typed responses
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
 import { supabase } from './supabase';
 
 

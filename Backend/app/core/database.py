@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 
 from app.core.config import get_settings
@@ -37,23 +37,10 @@ if url:
         if not settings.is_dev:
             engine_kwargs["poolclass"] = NullPool
 
-        # Force IPv4 to avoid Vercel/asyncpg Errno 99
-        import socket
-        from urllib.parse import urlparse
-        parsed = urlparse(url)
-        original_host = parsed.hostname
-        if original_host and not original_host.replace('.', '').isdigit():
-            try:
-                ipv4_host = socket.gethostbyname(original_host)
-                url = url.replace(original_host, ipv4_host, 1)
-                print(f"Forcing IPv4 for {original_host} -> {ipv4_host[:3]}***")
-            except Exception as e:
-                print(f"IPv4 resolution failed for {original_host}: {e}")
-
-        # asyncpg specific connection args
+        # asyncpg accepts "ssl", but not a separate "server_hostname" kwarg.
+        # Keep the original hostname in the URL so TLS/SNI works with Supabase.
         engine_kwargs["connect_args"] = {
             "ssl": True,
-            "server_hostname": original_host, # Required for SSL if using IP in URL
             "command_timeout": 30,
             "server_settings": {
                 "search_path": "public",

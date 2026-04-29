@@ -90,6 +90,7 @@ if settings.is_prod and "https://well-sync-nine.vercel.app" not in ALLOWED_ORIGI
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS if "*" not in ALLOWED_ORIGINS else ["*"],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
