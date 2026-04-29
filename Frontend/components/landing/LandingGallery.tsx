@@ -92,46 +92,16 @@ function FlipStackCard({ images, titles, index }: { images: string[], titles: st
           </div>
         </div>
 
-        {/* Back Side (The AI Sticker) */}
+        {/* Back Side (mirrored horizontally to show text correctly) */}
         <div 
-          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden border-4 border-white glass-strong flex items-center justify-center p-6 bg-white/5 shadow-[0_0_40px_rgba(255,255,255,0.1)]"
+          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden border border-white/10 glass-card"
           style={{ transform: "rotateY(180deg)" }}
         >
-          <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* The Sticker Image */}
-            <motion.div 
-              className="relative w-full h-[85%] rounded-2xl overflow-hidden border-2 border-white shadow-lg"
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <img src="/images/landing/family-sticker.png" alt="Happy Rural Family" className="w-full h-full object-cover" />
-              
-              {/* Simulated Eye Blinking (Overlay divs) */}
-              {/* Note: Positioned roughly where eyes would be on a standard portrait */}
-              <motion.div 
-                className="absolute top-[35%] left-[38%] w-1.5 h-0.5 bg-black/80 rounded-full"
-                animate={{ scaleY: [0, 1, 0] }}
-                transition={{ duration: 0.15, repeat: Infinity, repeatDelay: 3 }}
-              />
-              <motion.div 
-                className="absolute top-[35%] left-[43%] w-1.5 h-0.5 bg-black/80 rounded-full"
-                animate={{ scaleY: [0, 1, 0] }}
-                transition={{ duration: 0.15, repeat: Infinity, repeatDelay: 3 }}
-              />
-              <motion.div 
-                className="absolute top-[32%] left-[62%] w-1.5 h-0.5 bg-black/80 rounded-full"
-                animate={{ scaleY: [0, 1, 0] }}
-                transition={{ duration: 0.15, repeat: Infinity, repeatDelay: 4 }}
-              />
-            </motion.div>
-            
-            <motion.div 
-              className="mt-4 px-4 py-1.5 bg-white text-surface-950 font-heading font-bold text-sm rounded-full shadow-lg"
-              animate={{ y: [0, -3, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              Happy Families, Healthier Future
-            </motion.div>
+          <img src={images[(step) % 3]} alt="Healthcare" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-cyan-900/20 to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6">
+            <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest mb-1">Step {(step % 3) + 1}</p>
+            <h3 className="text-white font-heading font-bold text-xl">{titles[step % 3]}</h3>
           </div>
         </div>
       </motion.div>
