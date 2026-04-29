@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -8,20 +9,44 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-url = settings.database_url
-if url:
-    # Standardize URL for asyncpg
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
-    
-    # Remove any existing sslmode query params (we handle it in connect_args)
-    if "?" in url:
-        base_url, query = url.split("?", 1)
-        import urllib.parse
-        params = urllib.parse.parse_qs(query)
+
+def _normalize_database_url(database_url: str | None) -> str | None:
+    """Return a SQLAlchemy async URL that is compatible with Supabase poolers."""
+    if not database_url:
+        return None
+
+    normalized = database_url.strip()
+
+    if normalized.startswith("postgres://"):
+        normalized = normalized.replace("postgres://", "postgresql://", 1)
+
+    if normalized.startswith("postgresql://"):
+        normalized = normalized.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    if normalized.startswith("postgresql+asyncpg://"):
+        parts = urlsplit(normalized)
+        params = parse_qs(parts.query, keep_blank_values=True)
+
+        # asyncpg does not accept libpq's sslmode query param. SQLAlchemy's
+        # asyncpg dialect accepts this query param and avoids PgBouncer prepared
+        # statement cache issues with Supabase transaction pooler connections.
         params.pop("sslmode", None)
-        new_query = urllib.parse.urlencode(params, doseq=True)
-        url = f"{base_url}?{new_query}" if new_query else base_url
+        params.setdefault("prepared_statement_cache_size", ["0"])
+
+        normalized = urlunsplit(
+            (
+                parts.scheme,
+                parts.netloc,
+                parts.path,
+                urlencode(params, doseq=True),
+                parts.fragment,
+            )
+        )
+
+    return normalized
+
+
+url = _normalize_database_url(settings.database_url)
 
 engine_kwargs = {
     "echo": settings.is_dev,
@@ -42,6 +67,7 @@ if url:
         engine_kwargs["connect_args"] = {
             "ssl": "require",
             "command_timeout": 30,
+            "statement_cache_size": 0,
             "server_settings": {
                 "search_path": "public",
                 "application_name": "vaxi-babu-api"

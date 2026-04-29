@@ -52,16 +52,16 @@ This is the locked stack unless explicitly changed in this document.
 
 ### Frontend
 
-- Next.js **16.2.3** with App Router.[web:92][web:163]
-- TypeScript.[web:92]
+- Next.js **15.4.9** with App Router.
+- TypeScript.
 - Tailwind CSS.
-- ShadCN UI.
+- Tailwind CSS component patterns (custom, shadcn-style).
 - Framer Motion.
 - TanStack Query.
 - React Hook Form.
 - Zod.
 - PWA support with service worker and manifest.[web:51]
-- IndexedDB with Dexie for offline-first local data.
+- Offline-first local data caching (IndexedDB; Dexie planned).
 
 ### Backend
 
@@ -74,7 +74,7 @@ This is the locked stack unless explicitly changed in this document.
 
 ### Database and ORM
 
-- Neon serverless Postgres.[web:79][web:81]
+- Supabase Postgres.
 - **SQLModel** (SQLAlchemy + Pydantic) as ORM for the backend — replaces Prisma for backend-only DB ownership.
 - **asyncpg** as the async Postgres driver.
 - **Alembic** for database migrations.
@@ -82,7 +82,8 @@ This is the locked stack unless explicitly changed in this document.
 
 ### Authentication
 
-- Auth.js / NextAuth with Prisma adapter.
+- JWT bearer tokens via backend OAuth2 login.
+- Optional Supabase-auth token verification and account sync.
 - Session strategy should remain simple for MVP.
 
 ### AI and intelligence
@@ -94,14 +95,14 @@ This is the locked stack unless explicitly changed in this document.
 
 ### Voice stack
 
-- Vapi AI for live voice agent orchestration.[web:134][web:136]
-- Vapi provider stack handles live STT/TTS and streaming conversational flow.[web:153]
+- Google Gemini Live API for live voice sessions.
+- Client-side streaming with backend tool handlers.
 - Browser Speech Synthesis may be retained as fallback only.
 
 ### Monorepo and tooling
 
 - Turborepo (planned for full monorepo).
-- pnpm workspaces (frontend).
+- npm (frontend).
 - ESLint, Prettier (frontend).
 - **pyproject.toml** with `hatchling` build backend (Python).
 - **ruff** for Python linting and formatting.
@@ -120,7 +121,7 @@ This is the locked stack unless explicitly changed in this document.
 
 - Vercel for frontend.
 - Railway or Render for backend.
-- Neon for database hosting.[web:79][web:81]
+- Supabase for database hosting.
 
 ### Analytics and observability
 
@@ -129,11 +130,11 @@ This is the locked stack unless explicitly changed in this document.
 
 ## Why this stack is locked
 
-Next.js 16.2.3 is the latest stable direction and includes AI-oriented workflow improvements and better development ergonomics, which is useful when AI agents are assisting development.[web:92][web:149][web:163]
+Next.js 15.x is the current stable baseline in this repo and aligns with the App Router and React 19 runtime used across the frontend.
 
-Neon plus Prisma was selected over Convex and Supabase because the application has clearly relational data structures and benefits from schema clarity, SQL modeling, and long-term maintainability without Supabase’s paused free-project issue being part of the core stack choice.[web:79][web:81][web:95]
+Supabase Postgres is the current database host and aligns with the existing pooled connection setup and optional Supabase-auth token verification.
 
-Vapi was selected for the hackathon and MVP because it reduces live voice integration complexity and allows the team to ship faster with initial trial credits instead of building a custom low-latency voice transport stack from scratch.[web:136][web:137][web:145]
+Gemini Live is selected for the hackathon and MVP because it is already integrated end-to-end and keeps live voice integration complexity low.
 
 ## Product goals
 
@@ -312,7 +313,7 @@ Before adding any package, agent must check whether an existing dependency or na
 ## Database rules
 
 - Schema must be normalized enough for clarity but not overengineered.
-- Prisma schema is authoritative for database modeling.
+- SQLModel models and Alembic migrations are authoritative for backend schema; Prisma schema is a frontend mirror only.
 - Use migrations consistently.
 - Use audit timestamps on major tables.
 - Prefer explicit relations over JSON blobs for core domain data.
@@ -444,9 +445,10 @@ Using `AGENTS.md` is especially helpful because newer Next.js workflows explicit
 
 - Functional Next.js frontend.
 - Functional FastAPI backend.
-- Prisma schema and migrations.
-- Neon database connection.
-- Vapi integration for live voice.
+- SQLModel models and Alembic migrations.
+- Prisma schema (frontend mirror).
+- Supabase database connection.
+- Gemini Live integration for live voice.
 - Deterministic vaccination timeline engine.
 - Local offline support.
 - Core tests.
