@@ -2,10 +2,25 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { 
+  Pill, Heart, Activity, Brain, Syringe, 
+  ClipboardList, Smile, Tablet, Phone, HeartPulse 
+} from "lucide-react";
 
 export default function SplashScreen({ onComplete }: { onComplete: () => void }) {
-  const [phase, setPhase] = useState<"syringe" | "fluid" | "text" | "done">("syringe");
+  const [phase, setPhase] = useState<"text" | "done">("text");
   const brandName = "VaxiBabu";
+
+  const splashStickers = [
+    { Icon: Heart, color: "text-rose-400", bg: "bg-rose-500/20", top: "15%", left: "10%", delay: 0 },
+    { Icon: Brain, color: "text-purple-400", bg: "bg-purple-500/20", top: "40%", left: "5%", delay: 1 },
+    { Icon: Syringe, color: "text-cyan-400", bg: "bg-cyan-500/20", bottom: "15%", left: "12%", delay: 0.5 },
+    { Icon: ClipboardList, color: "text-emerald-400", bg: "bg-emerald-500/20", top: "10%", right: "10%", delay: 1.5 },
+    { Icon: HeartPulse, color: "text-blue-400", bg: "bg-blue-500/20", bottom: "35%", right: "8%", delay: 2 },
+    { Icon: Smile, color: "text-amber-400", bg: "bg-amber-500/20", top: "60%", left: "18%", delay: 0.8 },
+    { Icon: Tablet, color: "text-indigo-400", bg: "bg-indigo-500/20", bottom: "20%", right: "20%", delay: 1.2 },
+    { Icon: Phone, color: "text-teal-400", bg: "bg-teal-500/20", bottom: "10%", right: "5%", delay: 0.3 },
+  ];
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("text"), 200);
@@ -25,6 +40,73 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
         className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
         style={{ background: "radial-gradient(ellipse at center, #0a1628 0%, #020817 70%)" }}
       >
+        {/* DNA Helixes on sides */}
+        {[0, 1].map((side) => (
+          <motion.div
+            key={`dna-${side}`}
+            className="absolute top-0 bottom-0 w-8 opacity-20"
+            style={{ [side === 0 ? "left" : "right"]: "2%" }}
+          >
+            <svg width="32" height="100%" viewBox="0 0 32 800" preserveAspectRatio="none">
+              {[...Array(20)].map((_, i) => (
+                <motion.g key={i}>
+                  <motion.circle
+                    cx={16 + Math.sin(i + 0) * 12}
+                    cy={i * 40}
+                    r="3"
+                    fill="#06b6d4"
+                    animate={{ cx: [16 + Math.sin(i) * 12, 16 - Math.sin(i) * 12, 16 + Math.sin(i) * 12] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+                  />
+                  <motion.circle
+                    cx={16 - Math.sin(i + 0) * 12}
+                    cy={i * 40}
+                    r="3"
+                    fill="#3b82f6"
+                    animate={{ cx: [16 - Math.sin(i) * 12, 16 + Math.sin(i) * 12, 16 - Math.sin(i) * 12] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+                  />
+                  <motion.line
+                    x1={16 + Math.sin(i) * 12} y1={i * 40}
+                    x2={16 - Math.sin(i) * 12} y2={i * 40}
+                    stroke="rgba(255,255,255,0.1)" strokeWidth="1"
+                    animate={{ 
+                      x1: [16 + Math.sin(i) * 12, 16 - Math.sin(i) * 12, 16 + Math.sin(i) * 12],
+                      x2: [16 - Math.sin(i) * 12, 16 + Math.sin(i) * 12, 16 - Math.sin(i) * 12]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+                  />
+                </motion.g>
+              ))}
+            </svg>
+          </motion.div>
+        ))}
+
+        {/* Flowing Stickers for Splash */}
+        {splashStickers.map((s, i) => (
+          <motion.div
+            key={i}
+            className={`absolute p-4 rounded-3xl ${s.bg} border-2 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)] backdrop-blur-md`}
+            style={{ top: s.top, bottom: s.bottom, left: s.left, right: s.right }}
+            initial={{ opacity: 0, scale: 0, rotate: -20 }}
+            animate={{ 
+              opacity: 0.8, 
+              scale: 1,
+              y: [0, -30, 0],
+              x: [0, 20, 0],
+              rotate: [-20, 10, -20]
+            }}
+            transition={{ 
+              duration: 8 + i, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: s.delay 
+            }}
+          >
+            <s.Icon className={s.color} size={48} strokeWidth={2} />
+          </motion.div>
+        ))}
+
         {/* Background particles */}
         {[...Array(20)].map((_, i) => (
           <motion.div key={i}
