@@ -37,6 +37,13 @@ var navItems = [
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
+var bottomNavItems = [
+  { path: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { path: '/timeline', label: 'Timeline', icon: CalendarClock },
+  { path: '/medicines', label: 'Meds', icon: Pill },
+  { path: '/dependents', label: 'Family', icon: Users },
+];
+
 export function AppLayout({ children }: { children: ReactNode }) {
   var { logout } = useAuthStore();
   var { data: household } = useHousehold();
@@ -57,7 +64,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, [household, pathname, router]);
 
   return (
-    <div className="min-h-screen bg-surface-950 flex">
+    <div className="min-h-screen bg-surface-950 flex w-full max-w-[100vw] overflow-x-hidden">
       <aside className="hidden lg:flex flex-col w-64 bg-surface-900/80 border-r border-white/[0.06] fixed inset-y-0 left-0 z-30">
         <div className="p-5 border-b border-white/[0.06]">
           <Link href="/dashboard" className="flex items-center gap-2.5">
@@ -176,11 +183,31 @@ export function AppLayout({ children }: { children: ReactNode }) {
         )}
       </AnimatePresence>
 
-      <main className="flex-1 lg:ml-64 min-h-screen">
-        <div className="pt-16 lg:pt-0">
+      <main className="flex-1 min-w-0 lg:ml-64 min-h-screen">
+        <div className="pt-16 pb-20 lg:pt-0 lg:pb-0 w-full">
           {children}
         </div>
       </main>
+
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-950/90 backdrop-blur-xl border-t border-white/[0.06] pb-safe">
+        <div className="flex items-center justify-around h-16 px-2">
+          {bottomNavItems.map((item) => {
+            var active = pathname?.startsWith(item.path) || false;
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${
+                  active ? 'text-teal-400' : 'text-white/40 hover:text-white/70'
+                }`}
+              >
+                <item.icon size={20} className={active ? 'drop-shadow-[0_0_8px_rgba(32,223,200,0.5)]' : ''} />
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       <VoiceFAB />
     </div>

@@ -1,356 +1,288 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useSpring } from "motion/react";
-import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
 import {
+  Mic,
   Activity,
-  ArrowRight,
   ShieldCheck,
   BrainCircuit,
   Smartphone,
-  Clock,
   Globe2,
-  Star,
+  Clock,
+  ArrowRight,
+  Heart,
+  Baby,
+  Stethoscope,
+  Volume2,
+  Bell
 } from "lucide-react";
-import Link from "next/link";
-
-const MotionImage = motion.create(Image);
 
 export default function LandingClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"],
+    offset: ["start start", "end start"],
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
-    <div
-      className="relative z-10 w-full bg-[#0F172A] text-slate-50 selection:bg-secondary selection:text-[#0F172A]"
-      ref={containerRef}
-    >
-      {/* 0. GRAIN & MESH OVERLAY */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.04] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-
-      {/* GLOBAL MESH GRADIENTS */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, 50, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[60vw] h-[60vw] bg-secondary/10 rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            x: [0, -80, 0],
-            y: [0, 100, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[40%] -right-[15%] w-[50vw] h-[50vw] bg-primary/10 rounded-full blur-[100px]"
-        />
+    <div ref={containerRef} className="relative w-full bg-surface-950 text-white overflow-hidden selection:bg-teal-500/30 selection:text-teal-200 min-h-screen">
+      
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-900/20 via-surface-950 to-surface-950" />
+        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-teal-500/5 blur-[120px] mix-blend-screen" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-navy-500/5 blur-[120px] mix-blend-screen" />
+        <div className="absolute inset-0 opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       </div>
 
-      {/* 1. HERO - THE CINEMATIC HOOK */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center pt-28 pb-20 px-6 overflow-hidden">
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          >
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-surface-950/50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+              <Activity className="text-surface-950" size={20} strokeWidth={3} />
+            </div>
+            <span className="font-heading font-900 text-xl tracking-tight">Vaxi Babu</span>
+          </div>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#engine" className="hover:text-white transition-colors">The Engine</a>
+            <a href="#mission" className="hover:text-white transition-colors">Mission</a>
+          </div>
+          <Link href="/login" className="px-6 py-2.5 rounded-full bg-white text-surface-950 font-heading font-700 text-sm hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            Start Free
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 pt-40 pb-20 px-6 min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-16 items-center">
+          
+          {/* Left: Copy */}
+          <motion.div style={{ y, opacity }} className="max-w-2xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-secondary/20 bg-white/5 backdrop-blur-md text-secondary text-xs font-black uppercase tracking-widest mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-teal-500/20 bg-teal-500/5 backdrop-blur-sm mb-8"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-              Sovereign Health Infrastructure
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+              </span>
+              <span className="text-xs font-bold text-teal-400 tracking-wider uppercase">Voice-First Healthcare</span>
             </motion.div>
 
-            <h1 className="text-6xl md:text-8xl lg:text-[6.5rem] font-lora font-black tracking-tighter leading-[0.95] mb-8 text-white">
-              The Digital <br />
-              <span className="italic text-transparent bg-clip-text bg-[linear-gradient(135deg,var(--color-secondary),var(--color-primary))]">
-                Sanctuary
-              </span>{" "}
-              <br />
-              for Families.
-            </h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="font-heading font-900 text-5xl sm:text-7xl leading-[1.05] tracking-tight mb-8"
+            >
+              Your family's <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-300 to-teal-500">
+                health memory.
+              </span>
+            </motion.h1>
 
-            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-xl mb-12">
-              Vaxi Babu is a health memory system designed for the resilience of
-              rural life. Zero typing, offline-first, and clinical-grade
-              intelligence.
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-lg sm:text-xl text-white/50 leading-relaxed font-medium mb-10 max-w-xl"
+            >
+              No typing. No complex menus. Just speak in your native language, and Vaxi Babu will track, remind, and secure your family's medical future offline.
+            </motion.p>
 
-            <div className="flex flex-wrap gap-6">
-              <Link
-                href="/login"
-                className="px-10 py-5 bg-white text-[#0F172A] rounded-full font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-2xl"
-              >
-                Get Started
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-wrap items-center gap-4"
+            >
+              <Link href="/login" className="group relative flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-teal-500 text-surface-950 font-heading font-800 text-lg hover:scale-105 active:scale-95 transition-all overflow-hidden">
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                <span className="relative flex items-center gap-2">
+                  <Mic size={20} /> Try Voice Demo
+                </span>
               </Link>
-              <div className="flex items-center gap-4 text-slate-400 font-bold group">
-                <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white/5 transition-colors cursor-pointer">
-                  <Activity size={20} className="text-secondary" />
-                </div>
-                <span>View Live Schedule</span>
+              <div className="flex items-center gap-3 px-6 py-4 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-sm font-bold text-white/70 hidden sm:flex">
+                <Globe2 size={18} className="text-teal-400" /> Supports 12+ Dialects
               </div>
-            </div>
+            </motion.div>
           </motion.div>
 
-          {/* Hero Image Frame */}
+          {/* Right: UI Mockup / Abstract Art */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative aspect-square lg:aspect-[4/5] rounded-[3rem] overflow-hidden group shadow-2xl"
+            initial={{ opacity: 0, scale: 0.9, rotateY: 10 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
+            className="relative lg:h-[600px] flex items-center justify-center perspective-[1000px]"
           >
-            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_60%,rgba(15,23,42,0.9))] z-10" />
-            <div className="absolute inset-0 border-[20px] border-[#0F172A] z-20 rounded-[3rem] pointer-events-none" />
-            <MotionImage
-              src="/images/landing/hero.png"
-              alt="Rural Health"
-              width={1200}
-              height={1500}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[10s]"
-              priority
-            />
-            <div className="absolute bottom-12 left-12 z-30 right-12">
-              <div className="p-6 rounded-3xl bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center text-secondary">
-                    <Activity size={20} />
+            {/* Abstract Glow Behind Mockup */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-navy-500/20 rounded-full blur-[80px] animate-pulse" />
+            
+            {/* Floating Glass UI Panel */}
+            <div className="relative z-10 w-full max-w-md bg-surface-900/60 backdrop-blur-2xl border border-white/[0.08] rounded-[2rem] p-6 shadow-2xl transform-gpu rotate-y-[-5deg] rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 ease-out">
+              
+              {/* Mockup Header */}
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/[0.04]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-warm-400 to-warm-600 flex items-center justify-center text-xl shadow-lg">
+                    👩🏽
                   </div>
-                  <span className="font-black text-white">
-                    Live Health Analytics
-                  </span>
+                  <div>
+                    <div className="font-heading font-800 text-white text-lg leading-tight">Priya Sharma</div>
+                    <div className="text-xs text-white/40 font-medium">Mother · 2 Dependents</div>
+                  </div>
                 </div>
-                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "85%" }}
-                    transition={{ duration: 2, delay: 1 }}
-                    className="h-full bg-secondary"
-                  />
+                <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+                  <Bell size={16} className="text-white/40" />
                 </div>
               </div>
+
+              {/* Mockup Active State */}
+              <div className="relative p-6 rounded-2xl bg-teal-500/10 border border-teal-500/20 mb-6 overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-cyan-400" />
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center shrink-0">
+                    <Volume2 size={18} className="text-teal-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-teal-300 mb-1">Agent is speaking...</p>
+                    <p className="text-lg font-heading font-700 text-white leading-tight">
+                      "Aarav's OPV-3 Polio vaccine is due in exactly 3 days. Would you like me to set a reminder?"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mockup Schedule */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-surface-800/50 border border-white/[0.04]">
+                  <div className="w-10 h-10 rounded-xl bg-coral-500/10 flex items-center justify-center">
+                    <Activity size={18} className="text-coral-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-heading font-700 text-sm text-white">OPV-3 Polio</div>
+                    <div className="text-xs text-white/40">For Aarav · Due June 28</div>
+                  </div>
+                  <div className="px-3 py-1 rounded-full bg-coral-500/20 text-coral-300 text-xs font-bold">
+                    3 Days
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-surface-800/50 border border-white/[0.04]">
+                  <div className="w-10 h-10 rounded-xl bg-sage-500/10 flex items-center justify-center">
+                    <Stethoscope size={18} className="text-sage-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-heading font-700 text-sm text-white">Pediatric Checkup</div>
+                    <div className="text-xs text-white/40">For Diya · Scheduled</div>
+                  </div>
+                  <div className="px-3 py-1 rounded-full bg-surface-700 text-white/40 text-xs font-bold">
+                    Next Month
+                  </div>
+                </div>
+              </div>
+
             </div>
+
+            {/* Floating Elements */}
+            <motion.div animate={{ y: [-10, 10, -10] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute -right-8 top-1/4 z-20 bg-surface-800/80 backdrop-blur-xl border border-white/[0.08] p-4 rounded-2xl shadow-2xl hidden sm:flex items-center gap-3">
+              <ShieldCheck className="text-teal-400" />
+              <span className="text-sm font-bold text-white">Offline Synced</span>
+            </motion.div>
+            
+            <motion.div animate={{ y: [10, -10, 10] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute -left-12 bottom-1/4 z-20 bg-surface-800/80 backdrop-blur-xl border border-white/[0.08] p-4 rounded-2xl shadow-2xl hidden sm:flex items-center gap-3">
+              <BrainCircuit className="text-navy-400" />
+              <span className="text-sm font-bold text-white">NIS Engine</span>
+            </motion.div>
+
           </motion.div>
         </div>
       </section>
 
-      {/* 2. THE IDENTITY (High contrast Editorial) */}
-      <section className="relative py-40 border-y border-white/5 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-8">
-              <span className="text-secondary font-black tracking-widest uppercase text-xs mb-6 block">
-                — Philosophy
-              </span>
-              <h2 className="text-5xl md:text-8xl font-lora font-black text-white leading-[1] tracking-tighter">
-                Clinical precision <br /> meets{" "}
-                <span className="italic font-serif text-secondary/80">
-                  rural empathy.
-                </span>
-              </h2>
+      {/* Bento Grid Features */}
+      <section id="features" className="relative z-10 py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-20">
+            <h2 className="font-heading font-900 text-4xl sm:text-6xl text-white mb-6 leading-tight">
+              Clinical precision, <br/>
+              <span className="text-white/40">rural empathy.</span>
+            </h2>
+            <p className="text-xl text-white/50 max-w-2xl font-medium">
+              We replaced chaotic paper records with a secure digital sanctuary. Engineered for low-literacy, offline-first environments.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Large Card */}
+            <div className="md:col-span-2 md:row-span-2 group relative p-8 sm:p-12 rounded-[2.5rem] bg-surface-900/40 border border-white/[0.06] hover:bg-surface-900/60 transition-colors overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="w-16 h-16 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-8 border border-teal-500/20">
+                  <Mic size={28} className="text-teal-400" />
+                </div>
+                <h3 className="font-heading font-900 text-3xl sm:text-4xl text-white mb-4">Native Dialect Intelligence</h3>
+                <p className="text-lg text-white/50 font-medium max-w-md mb-12">
+                  Powered by Gemini Live. The engine understands context, medical terms, and intent—all through natural voice in your mother tongue.
+                </p>
+                <div className="mt-auto">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500/20 text-teal-300 text-sm font-bold">
+                    <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                    Live Audio Processing
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="lg:col-span-4 flex flex-col justify-end">
-              <p className="text-2xl text-slate-300 font-medium leading-[1.4]">
-                We replace chaotic paper records with a deterministic,
-                cryptographically secure digital sanctuary. Safe. Sovereign.
-                Simple.
+
+            {/* Small Card 1 */}
+            <div className="group relative p-8 rounded-[2.5rem] bg-surface-900/40 border border-white/[0.06] hover:bg-surface-900/60 transition-colors overflow-hidden">
+              <div className="w-12 h-12 rounded-xl bg-coral-500/10 flex items-center justify-center mb-6 border border-coral-500/20">
+                <Smartphone size={24} className="text-coral-400" />
+              </div>
+              <h3 className="font-heading font-800 text-2xl text-white mb-3">Offline-First PWA</h3>
+              <p className="text-white/50 font-medium text-sm leading-relaxed">
+                Your medical data never leaves the sovereign boundary of your device unless explicitly synced. It works deep in the village, far from cell towers.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 3. THE ECOSYSTEM (Bento Overhaul) */}
-      <section className="relative py-40 bg-black/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="max-w-2xl">
-              <h2 className="text-secondary font-black tracking-widest uppercase text-xs mb-4">
-                The Ecosystem
-              </h2>
-              <h3 className="text-5xl md:text-7xl font-lora font-black text-white leading-tight">
-                Everything, <br /> synchronized.
-              </h3>
-            </div>
-            <p className="text-lg text-slate-400 font-medium md:max-w-xs leading-relaxed">
-              A complete suite of medical automation models working in parallel
-              to secure your family&apos;s future.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 min-h-[800px]">
-            {/* Feature 1: Predictive */}
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="md:col-span-3 bg-white/5 border border-white/10 rounded-[3rem] p-12 overflow-hidden relative group"
-            >
-              <div className="absolute top-0 right-0 p-8">
-                <Clock className="w-12 h-12 text-secondary/30 group-hover:text-secondary transition-colors" />
+            {/* Small Card 2 */}
+            <div className="group relative p-8 rounded-[2.5rem] bg-surface-900/40 border border-white/[0.06] hover:bg-surface-900/60 transition-colors overflow-hidden">
+              <div className="w-12 h-12 rounded-xl bg-navy-500/10 flex items-center justify-center mb-6 border border-navy-500/20">
+                <Clock size={24} className="text-navy-400" />
               </div>
-              <div className="relative z-10 h-full flex flex-col justify-end">
-                <h4 className="text-4xl font-black mb-4 text-white">
-                  Predictive <br /> NIS Engine
-                </h4>
-                <p className="text-slate-400 text-lg max-w-sm font-medium">
-                  Deterministic vaccination mapping that lives offline and
-                  alerts you via voice.
-                </p>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary/5 to-transparent pointer-events-none" />
-            </motion.div>
-
-            {/* Feature 2: High fidelity Image Feature */}
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              className="md:col-span-3 md:row-span-2 bg-[#2563EB] rounded-[3rem] overflow-hidden relative shadow-2xl"
-            >
-              <Image
-                src="/images/landing/tech.png"
-                alt="Tech"
-                fill
-                className="object-cover mix-blend-soft-light opacity-60"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2563EB] via-transparent to-transparent opacity-80" />
-              <div className="relative z-10 p-12 h-full flex flex-col justify-end">
-                <Activity className="w-12 h-12 text-white mb-8" />
-                <h4 className="text-5xl font-lora font-black text-white mb-6">
-                  Real-time <br /> Governance.
-                </h4>
-                <p className="text-blue-50 font-medium text-xl max-w-sm leading-relaxed">
-                  Your medical data never leaves the sovereign boundary of your
-                  device unless explicitly synced.
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Feature 3: OCR Interaction */}
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="md:col-span-3 bg-white/5 border border-white/10 rounded-[3rem] p-12 flex flex-col lg:flex-row items-center gap-12 group"
-            >
-              <div className="lg:w-1/2">
-                <h4 className="text-4xl font-black mb-4 text-white">
-                  GPT-4o OCR
-                </h4>
-                <p className="text-slate-400 text-lg font-medium">
-                  Scan any prescription. Our vision pipeline extracts, verifies,
-                  and logs interaction risks instantly.
-                </p>
-              </div>
-              <div className="lg:w-1/2 aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative">
-                <Image
-                  src="/images/landing/ocr.png"
-                  alt="Scanning"
-                  width={800}
-                  height={450}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-secondary/20 mix-blend-screen animate-pulse pointer-events-none" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. THE TECH STACK FLOW */}
-      <section className="relative py-40 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-            <div className="relative order-2 lg:order-1">
-              <div className="grid grid-cols-2 gap-6">
-                {[
-                  {
-                    icon: BrainCircuit,
-                    title: "Gemini Live",
-                    desc: "Native Dialects",
-                  },
-                  {
-                    icon: ShieldCheck,
-                    title: "PostgreSQL",
-                    desc: "Native SSL",
-                  },
-                  {
-                    icon: Smartphone,
-                    title: "PWA 3.0",
-                    desc: "Offline Memory",
-                  },
-                  {
-                    icon: Activity,
-                    title: "FastRT",
-                    desc: "Deterministic Engine",
-                  },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-secondary/50 transition-colors group"
-                  >
-                    <item.icon className="w-10 h-10 text-secondary mb-6 group-hover:scale-110 transition-transform" />
-                    <h4 className="font-black text-xl mb-1 text-white">
-                      {item.title}
-                    </h4>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">
-                      {item.desc}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
+              <h3 className="font-heading font-800 text-2xl text-white mb-3">Predictive NIS</h3>
+              <p className="text-white/50 font-medium text-sm leading-relaxed">
+                Deterministic India National Immunization Schedule mapping that calculates the exact windows for vaccines based purely on Date of Birth.
+              </p>
             </div>
 
-            <div className="order-1 lg:order-2">
-              <span className="text-secondary font-black tracking-widest uppercase text-xs mb-6 block">
-                — The Stack
-              </span>
-              <h3 className="text-5xl md:text-7xl font-lora font-black text-white leading-tight mb-10">
-                Intelligence <br /> without{" "}
-                <span className="italic text-secondary/80">compromise.</span>
-              </h3>
-              <div className="space-y-10">
-                <div className="flex gap-8 group">
-                  <div className="text-4xl font-black text-white/10 group-hover:text-secondary transition-colors duration-500">
-                    01
-                  </div>
-                  <div>
-                    <h4 className="text-2xl font-black mb-3 text-white">
-                      Multimodal Intelligence
-                    </h4>
-                    <p className="text-lg text-slate-400 font-medium leading-relaxed">
-                      Speak in your mother tongue. Our Gemini engine parses
-                      local dialects with clinical precision.
-                    </p>
-                  </div>
+            {/* Medium Card */}
+            <div className="md:col-span-3 group relative p-8 sm:p-12 rounded-[2.5rem] bg-gradient-to-r from-teal-900/20 to-navy-900/20 border border-white/[0.06] hover:border-teal-500/30 transition-colors overflow-hidden flex flex-col md:flex-row items-center gap-12">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/10 text-teal-400 text-xs font-bold uppercase tracking-wider mb-6">
+                  Multimodal Pipeline
                 </div>
-                <div className="w-full h-px bg-white/5" />
-                <div className="flex gap-8 group">
-                  <div className="text-4xl font-black text-white/10 group-hover:text-secondary transition-colors duration-500">
-                    02
-                  </div>
-                  <div>
-                    <h4 className="text-2xl font-black mb-3 text-white">
-                      Execution Reliability
-                    </h4>
-                    <p className="text-lg text-slate-400 font-medium leading-relaxed">
-                      Cold, hard code handles your children&apos;s medical
-                      timing, ensuring zero hallucination.
-                    </p>
-                  </div>
+                <h3 className="font-heading font-900 text-3xl sm:text-5xl text-white mb-4">GPT-4o Vision OCR</h3>
+                <p className="text-lg text-white/60 font-medium">
+                  Scan any handwritten prescription or medicine strip. Our vision pipeline extracts active ingredients, verifies dosages, and logs interaction risks instantly.
+                </p>
+              </div>
+              <div className="w-full md:w-1/3 aspect-square rounded-[2rem] bg-surface-950 border border-white/[0.04] p-4 flex flex-col gap-3 shadow-2xl relative">
+                <div className="absolute inset-0 bg-teal-500/10 rounded-[2rem] animate-pulse" />
+                <div className="h-1/2 w-full bg-white/[0.02] rounded-xl flex items-center justify-center border border-white/[0.04]">
+                  <Activity size={32} className="text-white/20" />
+                </div>
+                <div className="h-4 w-3/4 bg-white/[0.05] rounded-full" />
+                <div className="h-4 w-1/2 bg-white/[0.05] rounded-full" />
+                <div className="mt-auto h-10 w-full bg-teal-500/20 rounded-xl flex items-center justify-center border border-teal-500/30">
+                  <span className="text-teal-400 text-sm font-bold">Scanning...</span>
                 </div>
               </div>
             </div>
@@ -358,75 +290,47 @@ export default function LandingClient() {
         </div>
       </section>
 
-      {/* 5. CLIMAX CTA */}
-      <section className="relative py-64 bg-[#0F172A] overflow-hidden text-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(59,130,246,0.15)_0%,transparent_70%)] pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto px-6 relative z-10">
-          <motion.h2
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="text-7xl md:text-[10rem] font-lora font-black text-white tracking-tighter leading-[0.85] mb-16"
-          >
-            The future <br /> <span className="text-secondary">is yours.</span>
-          </motion.h2>
-
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-4 bg-white text-[#0F172A] px-16 py-8 rounded-full text-3xl font-black shadow-2xl hover:scale-105 transition-all group active:scale-95"
-          >
-            Join Vaxi Babu
-            <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+      {/* CTA Climax */}
+      <section className="relative z-10 py-32 px-6">
+        <div className="max-w-5xl mx-auto bg-gradient-to-b from-surface-800/80 to-surface-900/80 backdrop-blur-2xl rounded-[3rem] border border-white/[0.08] p-12 sm:p-20 text-center overflow-hidden relative shadow-[0_0_100px_rgba(20,184,166,0.1)]">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[300px] bg-teal-500/20 blur-[120px] rounded-full pointer-events-none" />
+          
+          <h2 className="relative z-10 font-heading font-900 text-5xl sm:text-7xl text-white mb-8 tracking-tight">
+            The future is <span className="text-teal-400">yours.</span>
+          </h2>
+          <p className="relative z-10 text-xl text-white/50 mb-12 max-w-2xl mx-auto font-medium">
+            Join thousands of families securing their children's health with the world's most advanced, yet simplest, health memory system.
+          </p>
+          
+          <Link href="/login" className="relative z-10 inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-surface-950 font-heading font-900 text-xl hover:scale-105 active:scale-95 transition-all shadow-2xl">
+            Join Vaxi Babu <ArrowRight size={24} />
           </Link>
 
-          <div className="mt-20 flex flex-wrap justify-center gap-12 opacity-40 grayscale hover:grayscale-0 transition-all">
-            <div className="flex items-center gap-2 font-black text-sm tracking-widest uppercase">
-              <Star fill="currentColor" size={16} className="text-secondary" />
-              Top Rated Medical PWA
-            </div>
-            <div className="flex items-center gap-2 font-black text-sm tracking-widest uppercase">
-              <Star fill="currentColor" size={16} className="text-secondary" />
-              Privacy Guaranteed
-            </div>
+          <div className="relative z-10 flex flex-wrap items-center justify-center gap-8 mt-16 text-white/40 font-bold text-sm uppercase tracking-widest">
+            <span className="flex items-center gap-2"><ShieldCheck size={18} /> Privacy First</span>
+            <span className="flex items-center gap-2"><Smartphone size={18} /> 100% Free</span>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="relative py-20 px-6 border-t border-white/5 bg-black/20">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-              <Activity className="text-[#0F172A]" size={24} strokeWidth={3} />
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/[0.04] bg-surface-950 py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center">
+              <Activity className="text-surface-950" size={16} strokeWidth={3} />
             </div>
-            <span className="text-3xl font-lora font-black text-white">
-              Vaxi Babu
-            </span>
+            <span className="font-heading font-900 text-white">Vaxi Babu</span>
           </div>
-
-          <div className="flex gap-12 text-sm font-black uppercase tracking-widest text-slate-500">
-            <Link
-              href="/login"
-              className="hover:text-secondary transition-colors"
-            >
-              Safety
-            </Link>
-            <Link
-              href="/login"
-              className="hover:text-secondary transition-colors"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/login"
-              className="hover:text-secondary transition-colors"
-            >
-              Terms
-            </Link>
-          </div>
-
-          <div className="text-slate-500 font-bold text-xs uppercase tracking-tighter">
+          
+          <div className="text-white/30 text-sm font-medium text-center md:text-left">
             Built for the multi-sovereign world.
+          </div>
+          
+          <div className="flex gap-6 text-sm font-bold text-white/40">
+            <Link href="/login" className="hover:text-teal-400 transition-colors">Safety</Link>
+            <Link href="/login" className="hover:text-teal-400 transition-colors">Privacy</Link>
+            <Link href="/login" className="hover:text-teal-400 transition-colors">Terms</Link>
           </div>
         </div>
       </footer>

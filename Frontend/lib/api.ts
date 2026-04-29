@@ -423,6 +423,7 @@ export const authApi = {
     }
 
     // Resolve household by calling /auth/sync to ensure household record exists
+    let backendHouseholdId = data.user.id;
     try {
       const syncResponse = await fetch(`${API_URL}/api/v1/auth/sync`, {
         method: 'POST',
@@ -431,18 +432,23 @@ export const authApi = {
         },
       });
 
-      if (!syncResponse.ok) {
+      if (syncResponse.ok) {
+        const syncData = await syncResponse.json();
+        if (syncData.household_id) {
+          backendHouseholdId = syncData.household_id;
+        }
+      } else {
         console.warn('Sync failed, but proceeding with user ID as household ID');
       }
     } catch (e) {
       console.warn('Could not sync household record:', e);
     }
 
-    // Return Supabase user ID as both user ID and household ID
+    // Return the actual household ID resolved by the backend (crucial for merged/legacy accounts)
     return {
       access_token: data.session.access_token,
       token_type: 'bearer',
-      household_id: data.user.id,
+      household_id: backendHouseholdId,
     };
   },
 

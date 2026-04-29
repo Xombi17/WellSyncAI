@@ -87,7 +87,7 @@ export default function TimelinePage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         {dep ? (
           <div className="flex items-center gap-3 mb-1">
             <span className="text-3xl">{dep.avatar}</span>
@@ -104,7 +104,7 @@ export default function TimelinePage() {
         )}
         
         {depId && (
-          <button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-400 text-surface-950 font-heading font-700 text-sm rounded-xl transition-all">
+          <button onClick={() => setShowAddForm(true)} className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-surface-950 font-heading font-700 text-sm rounded-xl transition-all">
             <Plus size={16} /> Add Record
           </button>
         )}

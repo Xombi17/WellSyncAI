@@ -59,13 +59,13 @@ export default function DashboardPage() {
             { label: 'Reminders', value: pendingReminders, icon: Bell, color: 'navy', link: '/reminders' },
           ].map((s, i) => (
             <motion.div key={i} {...anim(i + 1)}>
-              <Link href={s.link} className={`block p-4 sm:p-5 rounded-2xl bg-${s.color}-500/[0.06] border border-${s.color}-500/15 hover:border-${s.color}-500/30 transition-all group`}>
+              <Link href={s.link} className={`block p-4 sm:p-5 rounded-2xl bg-${s.color}-500/[0.06] border border-${s.color}-500/15 hover:border-${s.color}-500/30 transition-all group overflow-hidden`}>
                 <div className="flex items-center justify-between mb-3">
-                  <s.icon size={18} className={`text-${s.color}-400`} />
-                  <ArrowUpRight size={14} className="text-white/10 group-hover:text-white/30 transition-colors" />
+                  <s.icon size={18} className={`text-${s.color}-400 flex-shrink-0`} />
+                  <ArrowUpRight size={14} className="text-white/10 group-hover:text-white/30 transition-colors flex-shrink-0" />
                 </div>
                 <p className={`font-heading font-800 text-2xl text-${s.color}-400`}>{s.value}</p>
-                <p className="text-xs text-white/30 mt-0.5">{s.label}</p>
+                <p className="text-xs text-white/30 mt-0.5 truncate">{s.label}</p>
               </Link>
             </motion.div>
           ))}
@@ -119,11 +119,11 @@ export default function DashboardPage() {
                       {e.category === 'growth' && <Baby size={14} className={statusColor(e.status).split(' ')[0]} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-white truncate">{e.title}</p>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${statusColor(e.status)}`}>{e.status}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <p className="text-sm font-medium text-white truncate flex-1">{e.title}</p>
+                        <span className={`text-[10px] px-2 py-0.5 flex-shrink-0 rounded-full border font-medium ${statusColor(e.status)}`}>{e.status}</span>
                       </div>
-                      <p className="text-xs text-white/30 mt-0.5">{e.dep_name} · {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      <p className="text-xs text-white/30 mt-0.5 truncate">{e.dep_name} · {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
                     <ChevronRight size={14} className="text-white/10 group-hover:text-white/30 mt-1 flex-shrink-0" />
                   </Link>
