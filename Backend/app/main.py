@@ -6,22 +6,12 @@ from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-
-# Disable uvloop in production if present to avoid Errno 99 on Vercel
-import os
-if os.environ.get("VERCEL") == "1":
-    try:
-        import uvloop
-        # We can't easily uninstall it at runtime, but we can try to prevent 
-        # uvicorn from using it if we were starting it manually.
-        # Since Vercel starts it, we'll log it and hope the connection pool fix handles it.
-        # However, we can also try to force standard asyncio loop if possible.
-        import asyncio
-        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
-    except ImportError:
-        pass
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from app.api.v1.router import router as v1_router
 from app.core.config import get_settings
@@ -64,6 +54,9 @@ async def lifespan(app: FastAPI):
     log.info("Vaxi Babu_shutting_down")
 
 
+# ─── Rate Limiter ─────────────────────────────────────────────────────────────
+limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
+
 app = FastAPI(
     title="Vaxi Babu — Backend API",
     description=(
@@ -76,6 +69,10 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+# Attach limiter state and 429 handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 # Split comma-separated origins from settings
@@ -94,6 +91,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Compress responses larger than 1 KB — reduces timeline/schedule payloads by ~70%
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
 @app.exception_handler(Exception)

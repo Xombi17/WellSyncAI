@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -122,17 +123,24 @@ async def get_health_pass(
     if dep.household_id != current_household.id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    # Fetch health events for stats
-    query = select(HealthEvent).where(HealthEvent.dependent_id == dependent_id)
-    result = await session.execute(query)
-    events = result.scalars().all()
+    # OPTIMIZATION: Use SQL GROUP BY to count statuses — avoids loading all rows into memory.
+    # Previously: SELECT * FROM health_events WHERE dependent_id = ?  (O(N) rows)
+    # Now:        SELECT status, COUNT(*) GROUP BY status            (O(distinct statuses) rows)
+    status_counts_query = (
+        select(HealthEvent.status, func.count(HealthEvent.id).label("cnt"))
+        .where(HealthEvent.dependent_id == dependent_id)
+        .group_by(HealthEvent.status)
+    )
+    status_counts_result = await session.execute(status_counts_query)
+    status_counts: dict[str, int] = {
+        row.status: row.cnt for row in status_counts_result.all()
+    }
 
-    total_events = len(events)
-    completed_events = len([e for e in events if e.status == EventStatus.completed])
-    overdue_count = len([e for e in events if e.status == EventStatus.overdue])
+    total_events = sum(status_counts.values())
+    completed_events = status_counts.get(EventStatus.completed, 0)
+    overdue_count = status_counts.get(EventStatus.overdue, 0)
 
     # Calculate status and score
-    # Simple logic: 100 if all done, less if overdue or many upcoming
     health_score = (completed_events / total_events * 100) if total_events > 0 else 100
     status_color = "green"
     if overdue_count > 0:
@@ -140,14 +148,21 @@ async def get_health_pass(
     elif completed_events < total_events * 0.5:
         status_color = "yellow"
 
-    # Find next due
-    upcoming_events = [
-        e
-        for e in events
-        if e.status in (EventStatus.upcoming, EventStatus.due, EventStatus.overdue)
-    ]
-    upcoming_events.sort(key=lambda x: x.due_date)
-    next_event = upcoming_events[0] if upcoming_events else None
+    # OPTIMIZATION: Fetch only the single next-due event with ORDER BY + LIMIT 1.
+    # Previously: sorted all upcoming events in Python.
+    next_event_query = (
+        select(HealthEvent)
+        .where(
+            HealthEvent.dependent_id == dependent_id,
+            HealthEvent.status.in_(
+                [EventStatus.upcoming, EventStatus.due, EventStatus.overdue]
+            ),
+        )
+        .order_by(HealthEvent.due_date.asc())
+        .limit(1)
+    )
+    next_event_result = await session.execute(next_event_query)
+    next_event = next_event_result.scalar_one_or_none()
 
     return HealthPassResponse(
         dependent=dep,
