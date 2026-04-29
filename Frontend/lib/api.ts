@@ -379,6 +379,7 @@ export interface GrowthRecord {
 
 export async function createGrowthRecord(dependentId: string, data: {
   recorded_date: string;
+  household_id: string;
   height_cm?: number;
   weight_kg?: number;
   head_circumference_cm?: number;
@@ -387,7 +388,10 @@ export async function createGrowthRecord(dependentId: string, data: {
 }): Promise<GrowthRecord> {
   return fetchApi<GrowthRecord>(`/api/v1/growth/${dependentId}`, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      dependent_id: dependentId
+    }),
   });
 }
 

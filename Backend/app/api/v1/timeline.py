@@ -165,6 +165,9 @@ async def generate_timeline(
             await generate_growth_check_schedule(dep, session)
         elif dep.type == DependentType.pregnant:
             await generate_pregnancy_schedule(dep, dep.date_of_birth, session)
+        elif dep.type == DependentType.adult or dep.type == DependentType.elder:
+            # New support for adult schedules
+            await generate_and_save_schedule(dep, session)
 
         # Refresh statuses
         events = await refresh_event_statuses(dependent_id, session)

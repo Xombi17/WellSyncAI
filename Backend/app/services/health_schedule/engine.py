@@ -17,7 +17,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models.dependent import Dependent, DependentType
 from app.models.health_event import EventCategory, EventStatus, HealthEvent
 from app.models.medicine_regimen import FrequencyType, MedicineRegimen
-from app.services.health_schedule.rules import generate_child_schedule, get_schedule_version
+from app.services.health_schedule.rules import generate_child_schedule, generate_adult_schedule, get_schedule_version
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Status computation
@@ -101,12 +101,13 @@ async def generate_and_save_schedule(
     Idempotent: skips events that already exist (matched by schedule_key + dependent_id).
     Returns the full list of health events sorted by due_date.
     """
-    if dependent.type != DependentType.child:
-        # Only child NIS schedule supported in MVP
+    if dependent.type == DependentType.child:
+        scheduled = generate_child_schedule(dependent.date_of_birth)
+    elif dependent.type == DependentType.adult or dependent.type == DependentType.elder:
+        scheduled = generate_adult_schedule()
+    else:
+        # Unsupported type for now
         return []
-
-    dob = dependent.date_of_birth
-    scheduled = generate_child_schedule(dob)
 
     # Fetch existing events for this dependent (to avoid duplicates)
     result = await session.execute(select(HealthEvent).where(HealthEvent.dependent_id == dependent.id))
@@ -412,6 +413,54 @@ async def generate_growth_check_schedule(
                 check_date += timedelta(days=interval_days)
                 check_num += 1
             break
+
+    await session.flush()
+    all_events = list(existing_events) + new_events
+    all_events.sort(key=lambda e: e.due_date)
+    return all_events
+
+
+async def generate_adult_wellness_schedule(
+    dependent: Dependent,
+    session: AsyncSession,
+) -> list[HealthEvent]:
+    """Generate basic wellness and vaccination schedule for adults."""
+    if dependent.type not in (DependentType.adult, DependentType.elder):
+        return []
+
+    scheduled = generate_adult_schedule()
+
+    # Fetch existing
+    result = await session.execute(
+        select(HealthEvent).where(HealthEvent.dependent_id == dependent.id)
+    )
+    existing_events = result.scalars().all()
+    existing_keys = {e.schedule_key for e in existing_events}
+
+    today = date.today()
+    new_events: list[HealthEvent] = []
+
+    for s in scheduled:
+        if s.key in existing_keys:
+            continue
+
+        status = compute_status(s.due_date, completed=False, today=today)
+
+        event = HealthEvent(
+            dependent_id=dependent.id,
+            household_id=dependent.household_id,
+            name=s.name,
+            schedule_key=s.key,
+            category=EventCategory(s.category),
+            dose_number=s.dose_number,
+            due_date=s.due_date,
+            window_start=s.window_start,
+            window_end=s.window_end,
+            status=status,
+            schedule_version="adult_v1",
+        )
+        session.add(event)
+        new_events.append(event)
 
     await session.flush()
     all_events = list(existing_events) + new_events

@@ -87,3 +87,39 @@ def generate_child_schedule(dob: date) -> list[ScheduledEvent]:
     # Sort by due date (chronological)
     events.sort(key=lambda e: e.due_date)
     return events
+
+
+def generate_adult_schedule(reference_date: date | None = None) -> list[ScheduledEvent]:
+    """
+    Generate a basic wellness schedule for adults starting from reference_date (defaults to today).
+    Unlike children, adult events are often recurring or periodic.
+    """
+    ref = reference_date or date.today()
+    
+    path = Path(__file__).parents[3] / "data" / "adult_schedule.json"
+    if not path.exists():
+        return []
+        
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+        
+    events: list[ScheduledEvent] = []
+    for v in data["vaccines"]:
+        # For adults in MVP, we just set the events relative to the reference date
+        due = ref + timedelta(days=v.get("age_value", 0))
+        window_start = due + timedelta(days=v.get("window_start_days", -7))
+        window_end = due + timedelta(days=v.get("window_end_days", 30))
+        
+        events.append(ScheduledEvent(
+            key=v["key"],
+            name=v["name"],
+            category=v["category"],
+            dose_number=v.get("dose"),
+            due_date=due,
+            window_start=window_start,
+            window_end=window_end,
+            description=v.get("description", ""),
+            why_it_matters=v.get("why_it_matters", ""),
+            what_to_expect=v.get("what_to_expect", ""),
+        ))
+    return events

@@ -83,15 +83,11 @@ export function useDependents() {
     queryFn: async () => {
       var deps = await getDependents(householdId || undefined);
       return deps.map((d: Dependent) => ({
-        id: d.id,
-        name: d.name,
+        ...d,
         relation: mapTypeToRelation(d.type),
         dob: d.date_of_birth,
         gender: d.sex,
         avatar: avatarForRelation(mapTypeToRelation(d.type)),
-        pregnancy_week: undefined,
-        edd: d.expected_delivery_date,
-        high_risk_flags: undefined,
       }));
     },
     enabled: !!householdId,
@@ -104,12 +100,21 @@ export function useCreateDependent() {
 
   return useMutation({
     mutationFn: async (data: { name: string; relation: string; dob: string; gender: string }) => {
+      let type: 'child' | 'adult' | 'elder' | 'pregnant' = 'child';
+      
+      const rel = data.relation.toLowerCase();
+      if (rel === 'child') type = 'child';
+      else if (rel === 'mother' || rel === 'pregnant') type = 'pregnant';
+      else if (rel === 'elder' || rel === 'senior') type = 'elder';
+      else if (rel === 'spouse' || rel === 'parent' || rel === 'adult') type = 'adult';
+      else type = 'adult';
+
       return createDependent({
         household_id: householdId || '',
         name: data.name,
-        type: data.relation === 'mother' ? 'pregnant' : (data.relation as any) || 'child',
+        type,
         date_of_birth: data.dob,
-        sex: (data.gender as any) || 'other',
+        sex: (data.gender === 'male' ? 'M' : data.gender === 'female' ? 'F' : 'other') as any,
       });
     },
     onSuccess: () => {
@@ -315,29 +320,26 @@ export function useGrowthRecords(depId: string | undefined) {
     enabled: !!depId,
     queryFn: async () => {
       if (!depId) return [] as any[];
-      var records = await getGrowthRecords(depId);
-      return records.map((r: any) => ({
-        id: r.id,
-        date: r.recorded_date,
-        height: r.height_cm,
-        weight: r.weight_kg,
-        milestone: r.milestone_achieved,
-      }));
+      return getGrowthRecords(depId);
     },
   });
 }
 
 export function useAddGrowthRecord() {
-  var qc = useQueryClient();
+  const qc = useQueryClient();
+  const householdId = useAuthStore(s => s.householdId);
+
   return useMutation({
-    mutationFn: ({ depId, data }: { depId: string; data: { height: number; weight: number; milestone?: string } }) =>
-      createGrowthRecord(depId, {
-        recorded_date: new Date().toISOString().split('T')[0],
-        height_cm: data.height,
-        weight_kg: data.weight,
-        milestone_achieved: data.milestone,
-      }),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: ['growth', vars.depId] }),
+    mutationFn: async ({ depId, data }: { depId: string; data: any }) => {
+      return createGrowthRecord(depId, {
+        ...data,
+        household_id: householdId || '',
+        recorded_date: data.recorded_date || new Date().toISOString().split('T')[0],
+      });
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['growth', vars.depId] });
+    },
   });
 }
 

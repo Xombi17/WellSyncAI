@@ -24,7 +24,9 @@ class DependentType(str, Enum):
             return cls.elder
         if value_lower in ("pregnant", "pregnant_woman", "expecting"):
             return cls.pregnant
-        return cls(value_lower)
+        if value_lower in ("spouse", "partner", "husband", "wife", "parent"):
+            return cls.adult
+        return cls.adult # Default to adult instead of raising error
 
 
 class Sex(str, Enum):

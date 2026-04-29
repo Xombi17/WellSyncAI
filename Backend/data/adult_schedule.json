@@ -1,0 +1,98 @@
+{
+  "version": "adult_v1",
+  "source": "General Adult Health Standards — WHO/MoHFW",
+  "note": "Standard health checkups and vaccinations for adults.",
+  "vaccines": [
+    {
+      "key": "adult_checkup_annual",
+      "name": "Annual Health Checkup",
+      "category": "checkup",
+      "dose": 1,
+      "age_value": 0,
+      "age_unit": "days",
+      "window_start_days": -7,
+      "window_end_days": 30,
+      "description": "General physical examination, blood pressure check, and basic screening.",
+      "why_it_matters": "Early detection of lifestyle diseases like hypertension and diabetes is key to long-term health.",
+      "what_to_expect": "Physical exam and potentially blood tests."
+    },
+    {
+      "key": "td_booster",
+      "name": "Td (Tetanus-Diphtheria) Booster",
+      "category": "vaccination",
+      "dose": 1,
+      "age_value": 0,
+      "age_unit": "days",
+      "window_start_days": 0,
+      "window_end_days": 365,
+      "description": "Tetanus and adult Diphtheria booster dose.",
+      "why_it_matters": "Immunity against Tetanus wanes over time. A booster is recommended every 10 years for adults.",
+      "what_to_expect": "Injection in the upper arm. Mild soreness is normal."
+    },
+    {
+      "key": "covid_primary",
+      "name": "COVID-19 (Primary Series)",
+      "category": "vaccination",
+      "dose": 1,
+      "age_value": 0,
+      "age_unit": "days",
+      "window_start_days": -365,
+      "window_end_days": 30,
+      "description": "Primary vaccination series for COVID-19.",
+      "why_it_matters": "Protects against severe illness and hospitalization from COVID-19 variants.",
+      "what_to_expect": "Mild fever, body ache, or soreness at injection site for 1-2 days."
+    },
+    {
+      "key": "covid_booster",
+      "name": "COVID-19 (Precautionary Dose)",
+      "category": "vaccination",
+      "dose": 3,
+      "age_value": 180,
+      "age_unit": "days",
+      "window_start_days": 180,
+      "window_end_days": 365,
+      "description": "Booster dose for enhanced COVID-19 protection.",
+      "why_it_matters": "Maintains high level of immunity against emerging variants.",
+      "what_to_expect": "Similar reactions as primary doses."
+    },
+    {
+      "key": "hpv_adult",
+      "name": "HPV (Cervical Cancer Prevention)",
+      "category": "vaccination",
+      "dose": 1,
+      "age_value": 0,
+      "age_unit": "days",
+      "window_start_days": 0,
+      "window_end_days": 180,
+      "description": "Human Papillomavirus vaccine for prevention of cervical and other cancers.",
+      "why_it_matters": "Highly effective at preventing cervical cancer and other HPV-related conditions.",
+      "what_to_expect": "Injection. Mild soreness is common."
+    },
+    {
+      "key": "pneumococcal_adult",
+      "name": "Pneumococcal Vaccine (PCV/PPSV)",
+      "category": "vaccination",
+      "dose": 1,
+      "age_value": 0,
+      "age_unit": "days",
+      "window_start_days": 0,
+      "window_end_days": 365,
+      "description": "Vaccine against pneumonia-causing bacteria.",
+      "why_it_matters": "Recommended for adults with certain health conditions or those over 65.",
+      "what_to_expect": "Injection. Mild soreness."
+    },
+    {
+      "key": "flu_annual_adult",
+      "name": "Annual Influenza (Flu) Vaccine",
+      "category": "vaccination",
+      "dose": 1,
+      "age_value": 0,
+      "age_unit": "days",
+      "window_start_days": 0,
+      "window_end_days": 90,
+      "description": "Annual seasonal flu vaccination.",
+      "why_it_matters": "Protects against seasonal flu strains which can cause severe respiratory illness.",
+      "what_to_expect": "Annual injection. Best taken before the monsoon or winter season."
+    }
+  ]
+}

@@ -287,7 +287,7 @@ export default function TimelinePage() {
                   onClick={handleGenerate}
                   className="mx-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-blue-600 text-surface-950 font-heading font-700 rounded-xl transition-all shadow-lg shadow-teal-500/20"
                 >
-                  Generate India NIS Schedule <Sparkles size={16} />
+                  {dep?.type === 'child' ? 'Generate India NIS Schedule' : 'Generate Health Schedule'} <Sparkles size={16} />
                 </motion.button>
               )}
             </>
