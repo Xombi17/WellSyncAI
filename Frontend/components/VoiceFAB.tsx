@@ -68,7 +68,7 @@ export function VoiceFAB() {
     } finally {
       startInFlightRef.current = false;
     }
-  }, [isConnecting, isConnected, connect, dependentId, setTransientError]);
+  }, [isConnecting, isConnected, connect, language, dependentId, setTransientError]);
 
   const stopCall = useCallback(async () => {
     startInFlightRef.current = false;

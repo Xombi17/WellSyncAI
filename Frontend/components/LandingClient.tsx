@@ -84,7 +84,7 @@ export default function LandingClient() {
               transition={{ delay: 0.1 }}
               className="font-heading font-900 text-5xl sm:text-7xl leading-[1.05] tracking-tight mb-8"
             >
-              Your family's <br/>
+              Your family&apos;s <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-300 to-teal-500">
                 health memory.
               </span>
@@ -96,7 +96,7 @@ export default function LandingClient() {
               transition={{ delay: 0.2 }}
               className="text-lg sm:text-xl text-white/50 leading-relaxed font-medium mb-10 max-w-xl"
             >
-              No typing. No complex menus. Just speak in your native language, and Vaxi Babu will track, remind, and secure your family's medical future offline.
+              No typing. No complex menus. Just speak in your native language, and Vaxi Babu will track, remind, and secure your family&apos;s medical future offline.
             </motion.p>
 
             <motion.div
@@ -156,7 +156,7 @@ export default function LandingClient() {
                   <div>
                     <p className="text-sm font-medium text-teal-300 mb-1">Agent is speaking...</p>
                     <p className="text-lg font-heading font-700 text-white leading-tight">
-                      "Aarav's OPV-3 Polio vaccine is due in exactly 3 days. Would you like me to set a reminder?"
+                      &quot;Aarav&apos;s OPV-3 Polio vaccine is due in exactly 3 days. Would you like me to set a reminder?&quot;
                     </p>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export default function LandingClient() {
             The future is <span className="text-teal-400">yours.</span>
           </h2>
           <p className="relative z-10 text-xl text-white/50 mb-12 max-w-2xl mx-auto font-medium">
-            Join thousands of families securing their children's health with the world's most advanced, yet simplest, health memory system.
+            Join thousands of families securing their children&apos;s health with the world&apos;s most advanced, yet simplest, health memory system.
           </p>
           
           <Link href="/login" className="relative z-10 inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-surface-950 font-heading font-900 text-xl hover:scale-105 active:scale-95 transition-all shadow-2xl">
